@@ -1,8 +1,5 @@
-'use client'
-
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 
 interface NavItem {
   id: string

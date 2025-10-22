@@ -42,3 +42,9 @@ next-env.d.ts
 
 # swc
 .swc/
+
+env
+
+package-lock.json
+
+yarn.lock
