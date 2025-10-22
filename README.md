@@ -1,7 +1,3 @@
-# Nova Explorer Bot
-
-This is a Next.js application for the Nova Explorer Bot project.
-
 ## 技术栈
 
 ### 核心框架
@@ -95,18 +91,28 @@ yarn dev
 
 ```
 src/
-├── app/                    # Next.js App Router 页面
-│   ├── layout.tsx         # 根布局
-│   ├── page.tsx           # 首页
-│   └── globals.css        # 全局样式
-├── components/            # React 组件
-│   ├── __tests__/         # 组件测试
-│   └── WalletConnect.tsx  # 钱包连接组件
-├── lib/                   # 工具库
-│   ├── ton-config.ts      # TON 配置
-│   └── ton-client.ts      # TON 客户端
-└── stores/                # 状态管理
-    └── useWalletStore.ts  # 钱包状态
+├── app/                  # 页面路由（App Router）
+│   ├── home/             # 首页
+│   ├── store/            # 商店页面
+│   ├── task/             # 任务页面
+│   ├── backpack/         # 背包页面
+│   ├── base/             # 基础页面
+│   └── layout.tsx        # 全局布局
+├── components/          # UI 组件
+│   ├── layout/          # 布局组件（如底部导航）
+│   ├── ui/              # 通用 UI（加载、错误边界）
+│   └── WalletConnect.tsx # 钱包连接组件
+├── features/            # 功能模块
+│   ├── explorer/        # 区块链浏览器功能
+│   └── wallet/          # 钱包相关功能（含 hooks）
+├── lib/                 # 工具类库
+│   ├── ton-client.ts    # TON 客户端封装
+│   └── ton-config.ts    # TON 配置文件
+├── services/            # API 服务层
+├── stores/              # Zustand 状态管理
+├── types/               # TypeScript 类型定义
+├── utils/               # 工具函数（格式化、验证等）
+└── styles/              # 全局样式（globals.css）
 ```
 
 ## 功能特性
