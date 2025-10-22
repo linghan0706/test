@@ -1,6 +1,6 @@
-# Nova Explorer Bot Frontend
+# Nova Explorer Bot
 
-一个基于 Next.js 的 Telegram Bot 前端项目，支持 TON 钱包连接和区块链交互。
+This is a Next.js application for the Nova Explorer Bot project.
 
 ## 技术栈
 
