@@ -1,34 +1,31 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter } from 'next/font/google'
+import '@/styles/globals.css'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
-import './globals.css'
+import { ConfigProvider } from 'antd'
+import zhCN from 'antd/locale/zh_CN'
+import { MainLayout } from '@/components/layout'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Nova Explorer Bot',
-  description: 'Telegram Bot Frontend for Nova Explorer',
+  title: 'Nova Explorer GAME',
+  description: 'Nova星际游戏',
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="zh-CN">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AntdRegistry>{children}</AntdRegistry>
+      <body className={inter.className}>
+        <AntdRegistry>
+          <ConfigProvider locale={zhCN}>
+            <MainLayout>{children}</MainLayout>
+          </ConfigProvider>
+        </AntdRegistry>
       </body>
     </html>
   )

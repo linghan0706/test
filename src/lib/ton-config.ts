@@ -1,4 +1,4 @@
-// import { TonConnect } from '@tonconnect/sdk'
+import { TonConnect } from '@tonconnect/sdk'
 
 // TON Connect 配置
 export const tonConnectConfig = {

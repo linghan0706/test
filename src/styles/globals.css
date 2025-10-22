@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+/* Ant Design 样式重置 */
+.ant-layout {
+  background: transparent;
+}
+
+.ant-layout-content {
+  background: transparent;
+}
+
+/* 自定义主题变量 */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary-color: #1890ff;
+  --border-radius: 6px;
+  --theme-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --theme-gradient: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #581c87 100%);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* 确保 Ant Design 组件在 Tailwind 环境中正常工作 */
+.ant-btn {
+  @apply transition-all duration-200;
+}
+
+.ant-card {
+  @apply shadow-sm;
+}
+
+.ant-input {
+  @apply transition-all duration-200;
+}
+
+/* 移动端容器圆滑处理 */
+@media (min-width: 768px) {
+  .mobile-container {
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* 滚动条样式优化 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+.ant-select {
+  @apply transition-all duration-200;
+}
