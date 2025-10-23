@@ -92,7 +92,7 @@ yarn dev
 ```
 src/
 ├── app/                  # 页面路由（App Router）
-│   ├── home/             # 首页
+│   ├── home/             # 个人首页
 │   ├── store/            # 商店页面
 │   ├── task/             # 任务页面
 │   ├── backpack/         # 背包页面
