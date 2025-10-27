@@ -38,7 +38,7 @@ export function useWallet() {
     })
 
     return unsubscribe
-  }, [tonConnectUI, connectWallet, disconnectWallet])
+  }, [tonConnectUI, connectWallet, disconnectWallet, fetchBalance])
 
   // 连接钱包
   const connect = useCallback(async () => {

@@ -1,5 +1,3 @@
-import { TonConnect } from '@tonconnect/sdk'
-
 // TON Connect 配置
 export const tonConnectConfig = {
   manifestUrl: '/tonconnect-manifest.json',

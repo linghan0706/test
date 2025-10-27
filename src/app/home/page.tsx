@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { Button, Typography } from 'antd'
 import { motion } from 'framer-motion'
 
 

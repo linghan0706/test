@@ -154,7 +154,7 @@ export class TonService {
   /**
    * 搜索地址或交易
    */
-  async search(query: string): Promise<ApiResponse<any>> {
+  async search(query: string): Promise<ApiResponse<unknown>> {
     try {
       return await this.apiClient.get(`/v2/search`, { query })
     } catch (error) {
@@ -180,7 +180,7 @@ export class TonService {
   /**
    * 格式化地址为用户友好格式
    */
-  formatAddress(address: string, bounceable: boolean = true): string {
+  formatAddress(address: string, _bounceable: boolean = true): string {
     // 这里可以使用TON SDK的地址格式化方法
     // 暂时返回原地址
     return address
