@@ -5,6 +5,7 @@ import { AntdRegistry } from '@ant-design/nextjs-registry'
 import { ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { MainLayout } from '@/components/layout'
+import { LoadingProvider } from '@/components/ui/LoadingProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,9 +24,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <AntdRegistry>
           <ConfigProvider locale={zhCN}>
-            <MainLayout>
-              {children}
-            </MainLayout>
+            <LoadingProvider>
+              <MainLayout>
+                {children}
+              </MainLayout>
+            </LoadingProvider>
           </ConfigProvider>
         </AntdRegistry>
       </body>

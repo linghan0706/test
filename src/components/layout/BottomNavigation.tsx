@@ -1,5 +1,9 @@
+'use client'
+
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+
+
 import Image from 'next/image'
 
 interface NavItem {
@@ -14,7 +18,7 @@ const navItems: NavItem[] = [
   { id: 'task', label: '待办事项', path: '/task', icon: '/components/layout/NavIcon/TaskIcon.png' },
   { id: 'store', label: '购物袋', path: '/store', icon: '/components/layout/NavIcon/StoreIcon.png' },
   { id: 'base', label: '火箭', path: '/base', icon: '/components/layout/NavIcon/RocketIcon.png', isCenter: true },
-  { id: 'backpack', label: '包裹', path: '/backpack', icon: '/components/layout/NavIcon/backpack.png' },
+  { id: 'backpack', label: '包裹', path: '/backpack', icon: '/components/layout/NavIcon/Backpack.png' },
   { id: 'home', label: '个人中心', path: '/home', icon: '/components/layout/NavIcon/HomeIcon.png' },
 ]
 export default function BottomNavigation() {
@@ -39,7 +43,6 @@ export default function BottomNavigation() {
       >
         <foreignObject x="-4" y="-4" width="401" height="68">
           <div 
-            xmlns="http://www.w3.org/1999/xhtml" 
             style={{
               backdropFilter: 'blur(2px)',
               clipPath: 'url(#bgblur_0_2824_15_clip_path)',

@@ -8,9 +8,9 @@ import { WalletCard } from '@/features/wallet'
 const { Text } = Typography
 
 export default function WalletConnect() {
-  const { isConnected, ...walletState } = useWallet()
+  const walletState = useWallet()
 
-  if (!isConnected) {
+  if (!walletState.isConnected) {
     return (
       <Card title="连接钱包" className="w-full max-w-md">
         <Space direction="vertical" className="w-full">

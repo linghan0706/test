@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -30,12 +30,12 @@ export interface NetworkConfig {
 export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   headers?: Record<string, string>
-  params?: Record<string, any>
+  params?: Record<string, unknown>
   timeout?: number
 }
 
 export interface ErrorResponse {
   code: string
   message: string
-  details?: any
+  details?: Record<string, unknown> | null
 }

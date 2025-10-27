@@ -1,9 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Button, Typography } from 'antd'
 import { motion } from 'framer-motion'
-
 
 export default function HomePage() {
   return (

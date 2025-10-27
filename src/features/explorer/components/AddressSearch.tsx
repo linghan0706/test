@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Input, Button, Space, message, AutoComplete } from 'antd'
 import { SearchOutlined, ScanOutlined } from '@ant-design/icons'
-import { validateTonAddress, validateTransactionHash } from '@/utils'
+import { isValidTonAddress, isValidTransactionHash } from '@/utils'
 
 const { Search } = Input
 
@@ -26,12 +26,12 @@ export default function AddressSearch({
     const trimmedQuery = query.trim()
     
     // 检查是否为TON地址
-    if (validateTonAddress(trimmedQuery)) {
+    if (isValidTonAddress(trimmedQuery)) {
       return 'address'
     }
     
     // 检查是否为交易哈希
-    if (validateTransactionHash(trimmedQuery)) {
+    if (isValidTransactionHash(trimmedQuery)) {
       return 'transaction'
     }
     
@@ -56,12 +56,12 @@ export default function AddressSearch({
     const searchType = detectSearchType(trimmedValue)
     
     // 验证输入格式
-    if (searchType === 'address' && !validateTonAddress(trimmedValue)) {
+    if (searchType === 'address' && !isValidTonAddress(trimmedValue)) {
       message.error('请输入有效的TON地址格式')
       return
     }
     
-    if (searchType === 'transaction' && !validateTransactionHash(trimmedValue)) {
+    if (searchType === 'transaction' && !isValidTransactionHash(trimmedValue)) {
       message.error('请输入有效的交易哈希格式')
       return
     }

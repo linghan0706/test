@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTonConnectUI } from '@tonconnect/ui-react'
 import { useWalletStore } from '@/stores/useWalletStore'
 import { tonService } from '@/services'
@@ -22,23 +22,6 @@ export function useWallet() {
     updateBalance,
     setNetwork,
   } = useWalletStore()
-
-  // 监听钱包连接状态变化
-  useEffect(() => {
-    const unsubscribe = tonConnectUI.onStatusChange(wallet => {
-      if (wallet) {
-        connectWallet(wallet.account.address)
-        // 连接成功后获取余额
-        fetchBalance(wallet.account.address)
-      } else {
-        disconnectWallet()
-      }
-      setIsConnecting(false)
-      setIsDisconnecting(false)
-    })
-
-    return unsubscribe
-  }, [tonConnectUI, connectWallet, disconnectWallet])
 
   // 连接钱包
   const connect = useCallback(async () => {
@@ -89,6 +72,29 @@ export function useWallet() {
     }
   }, [address, updateBalance])
 
+  const fetchBalanceRef = useRef(fetchBalance);
+
+  useEffect(() => {
+    fetchBalanceRef.current = fetchBalance;
+  }, [fetchBalance]);
+
+  // 监听钱包连接状态变化
+  useEffect(() => {
+    const unsubscribe = tonConnectUI.onStatusChange(wallet => {
+      if (wallet) {
+        connectWallet(wallet.account.address)
+        // 连接成功后获取余额
+        fetchBalanceRef.current(wallet.account.address)
+      } else {
+        disconnectWallet()
+      }
+      setIsConnecting(false)
+      setIsDisconnecting(false)
+    })
+
+    return unsubscribe
+  }, [tonConnectUI, connectWallet, disconnectWallet, fetchBalanceRef])
+
   // 刷新余额
   const refreshBalance = useCallback(() => {
     if (address) {
@@ -118,6 +124,7 @@ export function useWallet() {
 
     try {
       const result = await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 300, // 5 minutes expiry
         messages: [
           {
             address: transaction.to,
