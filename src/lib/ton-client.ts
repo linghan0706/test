@@ -44,9 +44,3 @@ export const createWalletFromMnemonic = async (
 export const getWalletAddress = (wallet: WalletContractV4) => {
   return wallet.address.toString()
 }
-
-// 获取钱包余额
-export const getWalletBalance = async (client: TonClient, address: string) => {
-  const balance = await client.getBalance(address)
-  return balance
-}
