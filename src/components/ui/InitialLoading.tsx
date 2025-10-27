@@ -12,7 +12,7 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    // 简化加载逻辑，3秒后完成加载
+    // 1000000s后加载
     const timer = setTimeout(() => {
       onLoadingComplete?.()
     }, 1000000)
