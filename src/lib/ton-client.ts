@@ -1,17 +1,14 @@
 import { TonClient, WalletContractV4 } from '@ton/ton'
 import { mnemonicToWalletKey } from '@ton/crypto'
 import { TonApiClient } from '@ton-api/client'
-import { TonAdapter } from '@ton-api/ton-adapter'
 import { tonApiConfig, networkConfig, DEFAULT_NETWORK } from './ton-config'
 
 // TON API 客户端
 export const createTonApiClient = () => {
-  const adapter = new TonAdapter({
+  return new TonApiClient({
     apiKey: tonApiConfig.apiKey,
     baseUrl: tonApiConfig.baseUrl,
   })
-
-  return new TonApiClient({ adapter })
 }
 
 // TON 客户端
@@ -19,7 +16,7 @@ export const createTonClient = (
   network: keyof typeof networkConfig = DEFAULT_NETWORK
 ) => {
   const config = networkConfig[network]
-  return TonClient.create({
+  return new TonClient({
     endpoint: config.rpcEndpoint,
   })
 }

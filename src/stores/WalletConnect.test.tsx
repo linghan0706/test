@@ -26,18 +26,16 @@ describe('WalletConnect', () => {
   it('calls connectWallet when connect button is clicked', async () => {
     const mockConnectWallet = jest.fn()
     const { useWalletStore } = await import('../../stores/useWalletStore')
-    jest
-      .mocked(useWalletStore)
-      .mockReturnValue({
-        isConnected: false,
-        address: null,
-        balance: null,
-        network: 'mainnet',
-        connectWallet: mockConnectWallet,
-        disconnectWallet: jest.fn(),
-        updateBalance: jest.fn(),
-        setNetwork: jest.fn(),
-      })
+    jest.mocked(useWalletStore).mockReturnValue({
+      isConnected: false,
+      address: null,
+      balance: null,
+      network: 'mainnet',
+      connectWallet: mockConnectWallet,
+      disconnectWallet: jest.fn(),
+      updateBalance: jest.fn(),
+      setNetwork: jest.fn(),
+    })
 
     render(<WalletConnect />)
 

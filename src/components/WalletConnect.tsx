@@ -8,7 +8,8 @@ import { WalletCard } from '@/features/wallet'
 const { Text } = Typography
 
 export default function WalletConnect() {
-  const { isConnected, ...walletState } = useWallet()
+  const walletHook = useWallet()
+  const { isConnected, ...walletState } = walletHook
 
   if (!isConnected) {
     return (
@@ -23,7 +24,7 @@ export default function WalletConnect() {
 
   return (
     <WalletCard
-      wallet={walletState}
+      wallet={{ ...walletState, isConnected }}
       onDisconnect={walletState.disconnect}
       loading={walletState.isDisconnecting}
     />
