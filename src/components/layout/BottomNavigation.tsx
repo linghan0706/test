@@ -63,7 +63,6 @@ export default function BottomNavigation() {
       >
         <foreignObject x="-4" y="-4" width="401" height="68">
           <div
-            xmlns="http://www.w3.org/1999/xhtml"
             style={{
               backdropFilter: 'blur(2px)',
               clipPath: 'url(#bgblur_0_2824_15_clip_path)',
