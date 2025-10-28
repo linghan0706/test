@@ -15,7 +15,7 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
     // 1000000s后加载
     const timer = setTimeout(() => {
       onLoadingComplete?.()
-    }, 1000000)
+    },60)
 
     // 模拟进度条动画
     const progressTimer = setInterval(() => {
@@ -59,9 +59,9 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
             <Image
               src="/LoadingIcon/IntiaLoadong.png"
               alt="Nova Explorer Planet"
+              className="object-contain "
               width={128}
               height={128}
-              className="object-contain"
               style={{ imageRendering: 'pixelated' }}
               priority
             />
@@ -69,10 +69,10 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
 
           {/* 第一个火箭轨道容器 */}
           <motion.div
-            className="absolute inset-0 w-40 h-40"
+            className="absolute left-[16px] top-[10px] inset-0 w-[128px] h-[128px]"
             animate={{ rotate: 360 }}
             transition={{
-              duration: 8,
+              duration: 12,
               repeat: Infinity,
               ease: "linear",
             }}
@@ -82,11 +82,11 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
           >
             {/* 第一个火箭 */}
             <div
-              className="absolute w-8 h-8"
+              className="absolute"
               style={{
-                top: '10px',
+                top: '0px',
                 left: '50%',
-                marginLeft: '-16px',
+                marginLeft: '-20px',
               }}
             >
               {/* 火箭主体 */}
@@ -96,10 +96,11 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
                   alt="Rocket"
                   width={32}
                   height={32}
-                  className="object-contain"
+                  className="object-contain rotate-[-220deg] mt-[-3px]"
                   style={{ 
                     imageRendering: 'pixelated',
-                    transform: 'rotate(90deg)'
+                    transform: 'rotate(90deg)',
+                    height:'32px'
                   }}
                 />
               </div>
@@ -108,7 +109,7 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
 
           {/* 第二个火箭轨道容器 */}
           <motion.div
-            className="absolute inset-0 w-40 h-40"
+            className="absolute left-[16px] top-[10px] inset-0 w-[128px] h-[128px]"
             animate={{ rotate: 360 }}
             transition={{
               duration: 12,
@@ -121,24 +122,26 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
           >
             {/* 第二个火箭 */}
             <div
-              className="absolute w-6 h-6"
+              className="absolute"
               style={{
+                marginRight: '-12px',
                 bottom: '8px',
                 left: '50%',
                 marginLeft: '-12px',
               }}
             >
               {/* 火箭主体 */}
-              <div className="relative w-6 h-6">
+              <div className="relative w-8 h-8">
                 <Image
                   src="/LoadingIcon/Rocket.png"
                   alt="Rocket"
-                  width={24}
-                  height={24}
-                  className="object-contain"
+                  width={32}
+                  height={32}
+                  className="object-contain rotate-[-250deg] ml-[28px]"
                   style={{ 
                     imageRendering: 'pixelated',
-                    transform: 'rotate(-90deg)'
+                    transform: 'rotate(-90deg)',
+                    height:'32px'
                   }}
                 />
               </div>
@@ -148,10 +151,7 @@ const InitialLoading = ({ onLoadingComplete }: InitialLoadingProps) => {
 
         {/* NovaExplorer 标题 */}
         <h1
-          className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-green-400 via-yellow-400 via-orange-400 to-pink-400 bg-clip-text text-transparent"
-          style={{
-            fontFamily: "'Jersey 10', monospace",
-          }}
+          className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-green-400 via-yellow-400 via-orange-400 to-pink-400 bg-clip-text text-transparent font-jersey-10"
         >
           NovaExplorer
         </h1>

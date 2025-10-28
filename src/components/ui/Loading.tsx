@@ -404,8 +404,6 @@ export default function Loading({ onComplete }: LoadingProps) {
       </motion.div>
 
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
-        
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
