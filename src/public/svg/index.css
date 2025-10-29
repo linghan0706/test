@@ -1,0 +1,38 @@
+/*
+*Figma CSS样式生成
+*按组件模块分类
+*Data：20025-10-23
+*/
+.TaskPage {
+    /* 矩形 17195 */
+
+    position: absolute;
+    height: 33px;
+    left: 72.96%;
+    right: 26.33%;
+    top: calc(50% - 33px/2 + 886.5px);
+
+    background: url(矩形 17195.png);
+    /* Group 183 */
+
+    position: absolute;
+    width: 47px;
+    height: 47px;
+    left: 28px;
+    top: 212px;
+
+}
+
+.StorePage {
+    /* image 116 */
+
+    position: absolute;
+    width: 463px;
+    height: 1169px;
+    left: 0px;
+    top: -177px;
+
+    background: linear-gradient(0deg, #170C34, #170C34), url(image.png);
+
+
+}
