@@ -6,9 +6,9 @@ import { tonApiConfig, networkConfig, DEFAULT_NETWORK } from './ton-config'
 
 // TON API 客户端
 export const createTonApiClient = () => {
-  return new TonApiClient({ 
+  return new TonApiClient({
     baseUrl: tonApiConfig.baseUrl,
-    apiKey: tonApiConfig.apiKey
+    apiKey: tonApiConfig.apiKey,
   })
 }
 
