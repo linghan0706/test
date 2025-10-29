@@ -2,23 +2,15 @@
 
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
-import { getTelegramInitData, verifyInitData } from '@/utils/telegramBot'
+import { getTelegramInitData } from '@/utils/telegramBot'
 
 export default function HomePage() {
   useEffect(() => {
-    console.log("首页useEffect被调用 - 检查Telegram数据");
-    const fetchTelegramData = async () => {
-      console.log("调用fetchTelegramData函数");
+    const fetchTelegramData = () => {
       const initData = getTelegramInitData()
-      console.log("getTelegramInitData返回结果:", initData);
       if (initData) {
-        console.log("获取到Telegram初始化数据:", initData)
-        
-        // 发送到后端进行验证
-        const verificationResult = await verifyInitData(initData.rawInitData)
-        console.log("后端验证结果:", verificationResult)
-      } else {
-        console.log("未找到Telegram初始化数据");
+        // 只需要返回 initData，不发送到后端验证
+        console.log("返回Telegram Init Data:", initData)
       }
     }
     

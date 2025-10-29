@@ -41,12 +41,6 @@ export interface ParsedInitData {
   rawInitData: string;
 }
 
-export interface VerificationResponse {
-  success: boolean;
-  data?: Record<string, unknown>;
-  error?: string;
-}
-
 /**
  * 从 URL 中解析 Telegram Web App 数据
  * @returns Telegram 初始化数据或 null
@@ -60,13 +54,11 @@ const parseTelegramDataFromUrl = (): ParsedInitData | null => {
     const tgWebAppData = url.hash.match(/tgWebAppData=([^&]*)/);
     
     if (!tgWebAppData || !tgWebAppData[1]) {
-      console.log("在URL中未找到tgWebAppData参数");
       return null;
     }
     
     // 解码 URL 编码的数据
     const decodedData = decodeURIComponent(tgWebAppData[1]);
-    console.log("解码后的tgWebAppData:", decodedData);
     
     // 解析参数
     const params = new URLSearchParams(decodedData);
@@ -76,27 +68,28 @@ const parseTelegramDataFromUrl = (): ParsedInitData | null => {
     const queryId = params.get('query_id');
     
     if (!userData) {
-      console.log("在tgWebAppData中未找到用户数据");
       return null;
     }
     
     // 解析用户数据
-    const user: TelegramUser = JSON.parse(decodeURIComponent(userData));
-    console.log("解析到的用户数据:", user);
+    let user: TelegramUser | null = null;
+    try {
+      user = JSON.parse(decodeURIComponent(userData));
+    } catch (error) {
+      return null;
+    }
     
     // 构造返回数据
     const parsedData: ParsedInitData = {
-      user,
+      user: user || undefined,
       auth_date: authDate ? parseInt(authDate, 10) : undefined,
       hash: hash || undefined,
       query_id: queryId || undefined,
       rawInitData: decodedData
     };
     
-    console.log("构造的解析数据:", parsedData);
     return parsedData;
   } catch (error) {
-    console.error("从URL解析Telegram数据时出错:", error);
     return null;
   }
 };
@@ -106,29 +99,22 @@ const parseTelegramDataFromUrl = (): ParsedInitData | null => {
  * @returns Telegram 用户数据或 null
  */
 export const getTelegramUser = (): TelegramUser | null => {
-  console.log("调用getTelegramUser函数，检查Telegram Web App是否可用...");
-  
   // 首先检查 Telegram Web App SDK 是否可用
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     const webApp = window.Telegram.WebApp;
-    console.log("Telegram Web App SDK可用:", webApp);
     
     // 获取用户信息
     const user = webApp.initDataUnsafe?.user;
-    console.log("从SDK获取的Telegram用户数据:", user);
     
     return user || null;
   }
   
   // 如果 SDK 不可用，尝试从 URL 解析数据
-  console.log("Telegram Web App SDK不可用，尝试从URL解析数据...");
   const urlData = parseTelegramDataFromUrl();
   if (urlData?.user) {
-    console.log("从URL获取的Telegram用户数据:", urlData.user);
     return urlData.user;
   }
   
-  console.log("Telegram Web App不可用", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window对象未定义');
   return null;
 };
 
@@ -137,26 +123,16 @@ export const getTelegramUser = (): TelegramUser | null => {
  * @returns 解析后的初始化数据
  */
 export const getTelegramInitData = (): ParsedInitData | null => {
-  console.log("调用getTelegramInitData函数，检查Telegram Web App是否可用...");
-  
   // 首先检查 Telegram Web App SDK 是否可用
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     const webApp = window.Telegram.WebApp;
-    console.log("Telegram Web App SDK可用:", webApp);
     
     // 获取原始初始化数据
     const rawInitData = webApp.initData;
-    console.log("从SDK获取的原始初始化数据:", rawInitData);
-    
-    // 打印详细的安全相关信息（但不在这里解析敏感数据）
-    console.log("初始化数据长度:", rawInitData?.length);
-    console.log("是否包含用户数据:", !!webApp.initDataUnsafe?.user);
-    console.log("是否包含认证时间:", !!webApp.initDataUnsafe?.auth_date);
-    console.log("是否包含哈希值:", !!webApp.initDataUnsafe?.hash);
     
     if (!rawInitData) {
-      console.log("SDK中无初始化数据");
       return null;
+    
     }
     
     // 返回解析后的数据
@@ -170,125 +146,10 @@ export const getTelegramInitData = (): ParsedInitData | null => {
   }
   
   // 如果 SDK 不可用，尝试从 URL 解析数据
-  console.log("Telegram Web App SDK不可用，尝试从URL解析数据...");
   const urlData = parseTelegramDataFromUrl();
   if (urlData) {
-    console.log("从URL获取的Telegram初始化数据:", urlData);
     return urlData;
   }
   
-  console.log("Telegram Web App不可用", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window对象未定义');
   return null;
-};
-
-/**
- * 将 Telegram 初始化数据发送到后端进行验证
- * @param initData Telegram 初始化数据
- * @param endpoint 验证端点URL
- * @returns 后端验证响应
- */
-export const verifyInitData = async (
-  initData: string, 
-  endpoint: string = '/api/telegram/verify'
-): Promise<VerificationResponse> => {
-  try {
-    // 打印即将发送到后端的完整数据
-    console.log("准备发送数据到后端进行验证:");
-    console.log("- 验证端点:", endpoint);
-    console.log("- initData长度:", initData.length);
-    console.log("- initData预览:", initData.substring(0, 200) + (initData.length > 200 ? '...' : ''));
-    
-    // 发送到后端进行验证
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ initData }),
-    });
-    
-    console.log("后端响应状态:", response.status);
-    console.log("后端响应headers:", [...response.headers.entries()]);
-    
-    // 检查响应是否成功
-    if (!response.ok) {
-      console.error("后端响应失败:", {
-        status: response.status,
-        statusText: response.statusText
-      });
-      
-      // 尝试读取错误响应体
-      let errorData;
-      try {
-        errorData = await response.json();
-        console.error("后端错误响应数据:", errorData);
-      } catch (e) {
-        console.error("无法解析后端错误响应:", e);
-      }
-      
-      return { 
-        success: false, 
-        error: `后端响应失败: ${response.status} ${response.statusText}` 
-      };
-    }
-    
-    const result: Record<string, unknown> = await response.json();
-    console.log("后端响应数据:", result);
-    
-    if (response.ok) {
-      console.log("Telegram初始化数据验证成功:", result);
-      return { success: true, data: result };
-    } else {
-      console.error("Telegram初始化数据验证失败:", result);
-      return { success: false, error: (result.error as string) || '验证失败' };
-    }
-  } catch (error) {
-    console.error("在Telegram初始化数据验证过程中发生错误:", error);
-    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
-  }
-};
-
-/**
- * 使用示例函数（需要在组件中调用）
- * 获取用户数据并发送到后端验证
- */
-export const useTelegramUser = async () => {
-  // 获取 Telegram 初始化数据
-  const initData = getTelegramInitData();
-  
-  if (initData) {
-    // 打印详细的原始initData
-    console.log("Detailed Raw Init Data:", initData.rawInitData);
-    console.log("Parsed Init Data Details:", {
-      user: initData.user,
-      auth_date: initData.auth_date,
-      hash: initData.hash,
-      query_id: initData.query_id
-    });
-    
-    // 发送到后端验证
-    const verificationResult = await verifyInitData(initData.rawInitData);
-    
-    if (verificationResult.success) {
-      console.log("User verified successfully");
-      return {
-        user: initData.user,
-        verified: true,
-        verificationData: verificationResult.data
-      };
-    } else {
-      console.error("User verification failed:", verificationResult.error);
-      return {
-        user: initData.user,
-        verified: false,
-        error: verificationResult.error
-      };
-    }
-  }
-  
-  return {
-    user: null,
-    verified: false,
-    error: "Telegram Web App not available"
-  };
 };
