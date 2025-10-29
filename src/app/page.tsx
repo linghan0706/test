@@ -6,19 +6,19 @@ import { getTelegramInitData, verifyInitData } from '@/utils/telegramBot'
 
 export default function HomePage() {
   useEffect(() => {
-    console.log("HomePage useEffect called - checking Telegram data");
+    console.log("首页useEffect被调用 - 检查Telegram数据");
     const fetchTelegramData = async () => {
-      console.log("fetchTelegramData function called");
+      console.log("调用fetchTelegramData函数");
       const initData = getTelegramInitData()
-      console.log("getTelegramInitData result:", initData);
+      console.log("getTelegramInitData返回结果:", initData);
       if (initData) {
-        console.log("Telegram Init Data:", initData)
+        console.log("获取到Telegram初始化数据:", initData)
         
         // 发送到后端进行验证
         const verificationResult = await verifyInitData(initData.rawInitData)
-        console.log("Verification Result:", verificationResult)
+        console.log("后端验证结果:", verificationResult)
       } else {
-        console.log("No Telegram init data found");
+        console.log("未找到Telegram初始化数据");
       }
     }
     

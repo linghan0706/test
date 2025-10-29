@@ -48,23 +48,87 @@ export interface VerificationResponse {
 }
 
 /**
+ * 从 URL 中解析 Telegram Web App 数据
+ * @returns Telegram 初始化数据或 null
+ */
+const parseTelegramDataFromUrl = (): ParsedInitData | null => {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    // 获取当前 URL
+    const url = new URL(window.location.href);
+    const tgWebAppData = url.hash.match(/tgWebAppData=([^&]*)/);
+    
+    if (!tgWebAppData || !tgWebAppData[1]) {
+      console.log("在URL中未找到tgWebAppData参数");
+      return null;
+    }
+    
+    // 解码 URL 编码的数据
+    const decodedData = decodeURIComponent(tgWebAppData[1]);
+    console.log("解码后的tgWebAppData:", decodedData);
+    
+    // 解析参数
+    const params = new URLSearchParams(decodedData);
+    const userData = params.get('user');
+    const authDate = params.get('auth_date');
+    const hash = params.get('hash');
+    const queryId = params.get('query_id');
+    
+    if (!userData) {
+      console.log("在tgWebAppData中未找到用户数据");
+      return null;
+    }
+    
+    // 解析用户数据
+    const user: TelegramUser = JSON.parse(decodeURIComponent(userData));
+    console.log("解析到的用户数据:", user);
+    
+    // 构造返回数据
+    const parsedData: ParsedInitData = {
+      user,
+      auth_date: authDate ? parseInt(authDate, 10) : undefined,
+      hash: hash || undefined,
+      query_id: queryId || undefined,
+      rawInitData: decodedData
+    };
+    
+    console.log("构造的解析数据:", parsedData);
+    return parsedData;
+  } catch (error) {
+    console.error("从URL解析Telegram数据时出错:", error);
+    return null;
+  }
+};
+
+/**
  * 获取 Telegram 用户数据
  * @returns Telegram 用户数据或 null
  */
 export const getTelegramUser = (): TelegramUser | null => {
-  console.log("getTelegramUser called, checking Telegram Web App availability...");
+  console.log("调用getTelegramUser函数，检查Telegram Web App是否可用...");
+  
+  // 首先检查 Telegram Web App SDK 是否可用
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     const webApp = window.Telegram.WebApp;
-    console.log("Telegram Web App is available:", webApp);
+    console.log("Telegram Web App SDK可用:", webApp);
     
     // 获取用户信息
     const user = webApp.initDataUnsafe?.user;
-    console.log("Telegram User Data:", user);
+    console.log("从SDK获取的Telegram用户数据:", user);
     
     return user || null;
   }
   
-  console.log("Telegram Web App is not available", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window is undefined');
+  // 如果 SDK 不可用，尝试从 URL 解析数据
+  console.log("Telegram Web App SDK不可用，尝试从URL解析数据...");
+  const urlData = parseTelegramDataFromUrl();
+  if (urlData?.user) {
+    console.log("从URL获取的Telegram用户数据:", urlData.user);
+    return urlData.user;
+  }
+  
+  console.log("Telegram Web App不可用", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window对象未定义');
   return null;
 };
 
@@ -73,23 +137,25 @@ export const getTelegramUser = (): TelegramUser | null => {
  * @returns 解析后的初始化数据
  */
 export const getTelegramInitData = (): ParsedInitData | null => {
-  console.log("getTelegramInitData called, checking Telegram Web App availability...");
+  console.log("调用getTelegramInitData函数，检查Telegram Web App是否可用...");
+  
+  // 首先检查 Telegram Web App SDK 是否可用
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     const webApp = window.Telegram.WebApp;
-    console.log("Telegram Web App is available:", webApp);
+    console.log("Telegram Web App SDK可用:", webApp);
     
     // 获取原始初始化数据
     const rawInitData = webApp.initData;
-    console.log("Telegram Raw Init Data:", rawInitData);
+    console.log("从SDK获取的原始初始化数据:", rawInitData);
     
     // 打印详细的安全相关信息（但不在这里解析敏感数据）
-    console.log("Init Data Length:", rawInitData?.length);
-    console.log("Has User Data:", !!webApp.initDataUnsafe?.user);
-    console.log("Has Auth Date:", !!webApp.initDataUnsafe?.auth_date);
-    console.log("Has Hash:", !!webApp.initDataUnsafe?.hash);
+    console.log("初始化数据长度:", rawInitData?.length);
+    console.log("是否包含用户数据:", !!webApp.initDataUnsafe?.user);
+    console.log("是否包含认证时间:", !!webApp.initDataUnsafe?.auth_date);
+    console.log("是否包含哈希值:", !!webApp.initDataUnsafe?.hash);
     
     if (!rawInitData) {
-      console.log("No init data available");
+      console.log("SDK中无初始化数据");
       return null;
     }
     
@@ -103,7 +169,15 @@ export const getTelegramInitData = (): ParsedInitData | null => {
     };
   }
   
-  console.log("Telegram Web App is not available", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window is undefined');
+  // 如果 SDK 不可用，尝试从 URL 解析数据
+  console.log("Telegram Web App SDK不可用，尝试从URL解析数据...");
+  const urlData = parseTelegramDataFromUrl();
+  if (urlData) {
+    console.log("从URL获取的Telegram初始化数据:", urlData);
+    return urlData;
+  }
+  
+  console.log("Telegram Web App不可用", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window对象未定义');
   return null;
 };
 

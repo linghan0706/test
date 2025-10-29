@@ -6,20 +6,20 @@ import { getTelegramInitData, verifyInitData } from '@/utils/telegramBot'
 
 export default function HomePage() {
   useEffect(() => {
-    console.log("HomePage (home/page.tsx) useEffect called - checking Telegram data");
+    console.log("个人中心页面useEffect被调用 - 检查Telegram数据");
     // 在客户端环境中获取 Telegram 用户数据
     const fetchTelegramData = async () => {
-      console.log("fetchTelegramData function called in home page");
+      console.log("在个人中心页面调用fetchTelegramData函数");
       const initData = getTelegramInitData()
-      console.log("getTelegramInitData result in home page:", initData);
+      console.log("个人中心页面getTelegramInitData返回结果:", initData);
       if (initData) {
-        console.log("Telegram Init Data in home page:", initData)
+        console.log("个人中心页面获取到Telegram初始化数据:", initData)
         
         // 发送到后端进行验证
         const verificationResult = await verifyInitData(initData.rawInitData)
-        console.log("Verification Result in home page:", verificationResult)
+        console.log("个人中心页面后端验证结果:", verificationResult)
       } else {
-        console.log("No Telegram init data found in home page");
+        console.log("个人中心页面未找到Telegram初始化数据");
       }
     }
     
