@@ -193,7 +193,10 @@ export const verifyInitData = async (
 ): Promise<VerificationResponse> => {
   try {
     // 打印即将发送到后端的完整数据
-    console.log("Sending to backend for verification:", { initData });
+    console.log("准备发送数据到后端进行验证:");
+    console.log("- 验证端点:", endpoint);
+    console.log("- initData长度:", initData.length);
+    console.log("- initData预览:", initData.substring(0, 200) + (initData.length > 200 ? '...' : ''));
     
     // 发送到后端进行验证
     const response = await fetch(endpoint, {
@@ -204,23 +207,44 @@ export const verifyInitData = async (
       body: JSON.stringify({ initData }),
     });
     
-    const result: Record<string, unknown> = await response.json();
+    console.log("后端响应状态:", response.status);
+    console.log("后端响应headers:", [...response.headers.entries()]);
     
-    // 打印后端响应的详细信息
-    console.log("Backend response status:", response.status);
-    console.log("Backend response headers:", [...response.headers.entries()]);
-    console.log("Backend response data:", result);
+    // 检查响应是否成功
+    if (!response.ok) {
+      console.error("后端响应失败:", {
+        status: response.status,
+        statusText: response.statusText
+      });
+      
+      // 尝试读取错误响应体
+      let errorData;
+      try {
+        errorData = await response.json();
+        console.error("后端错误响应数据:", errorData);
+      } catch (e) {
+        console.error("无法解析后端错误响应:", e);
+      }
+      
+      return { 
+        success: false, 
+        error: `后端响应失败: ${response.status} ${response.statusText}` 
+      };
+    }
+    
+    const result: Record<string, unknown> = await response.json();
+    console.log("后端响应数据:", result);
     
     if (response.ok) {
-      console.log("Telegram init data verification successful:", result);
+      console.log("Telegram初始化数据验证成功:", result);
       return { success: true, data: result };
     } else {
-      console.error("Telegram init data verification failed:", result);
-      return { success: false, error: (result.error as string) || 'Verification failed' };
+      console.error("Telegram初始化数据验证失败:", result);
+      return { success: false, error: (result.error as string) || '验证失败' };
     }
   } catch (error) {
-    console.error("Error during Telegram init data verification:", error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    console.error("在Telegram初始化数据验证过程中发生错误:", error);
+    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
   }
 };
 
