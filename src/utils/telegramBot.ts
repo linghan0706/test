@@ -52,8 +52,10 @@ export interface VerificationResponse {
  * @returns Telegram 用户数据或 null
  */
 export const getTelegramUser = (): TelegramUser | null => {
+  console.log("getTelegramUser called, checking Telegram Web App availability...");
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     const webApp = window.Telegram.WebApp;
+    console.log("Telegram Web App is available:", webApp);
     
     // 获取用户信息
     const user = webApp.initDataUnsafe?.user;
@@ -62,7 +64,7 @@ export const getTelegramUser = (): TelegramUser | null => {
     return user || null;
   }
   
-  console.log("Telegram Web App is not available");
+  console.log("Telegram Web App is not available", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window is undefined');
   return null;
 };
 
@@ -71,8 +73,10 @@ export const getTelegramUser = (): TelegramUser | null => {
  * @returns 解析后的初始化数据
  */
 export const getTelegramInitData = (): ParsedInitData | null => {
+  console.log("getTelegramInitData called, checking Telegram Web App availability...");
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     const webApp = window.Telegram.WebApp;
+    console.log("Telegram Web App is available:", webApp);
     
     // 获取原始初始化数据
     const rawInitData = webApp.initData;
@@ -99,7 +103,7 @@ export const getTelegramInitData = (): ParsedInitData | null => {
     };
   }
   
-  console.log("Telegram Web App is not available",{$user: window.Telegram?.WebApp});
+  console.log("Telegram Web App is not available", typeof window !== 'undefined' ? window.Telegram?.WebApp : 'window is undefined');
   return null;
 };
 

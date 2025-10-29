@@ -9,8 +9,8 @@ import { MainLayout } from '@/components/layout'
 import { LoadingProvider } from '@/components/ui/LoadingProvider'
 import { getTelegramUser } from '@/utils/telegramBot'
 
-
-// console.log("userData", Telegram.getTelegramUser());
+// 在服务端调用会失败，因为 window 对象不存在
+// console.log("userData", getTelegramUser());
 
 const inter = Inter({ subsets: ['latin'] })
 const jersey10 = Jersey_10({ 
