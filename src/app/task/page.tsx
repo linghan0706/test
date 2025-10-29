@@ -267,22 +267,15 @@ export default function TaskPage() {
                        ${
                          task.status === 'completed' 
                            ? 'bg-gray-600/60 cursor-not-allowed opacity-70' 
-                           : (task.status === 'in_progress' && task.progress && task.progress.current < task.progress.total)
-                             ? 'bg-gray-600/60 cursor-not-allowed opacity-70'
-                             : 'bg-gradient-to-r from-[#6B0AE9] to-[#6410B1] hover:from-[#7B1AF9] hover:to-[#7420C1] hover:scale-105 cursor-pointer shadow-lg hover:shadow-xl active:scale-95'
+                           : 'bg-gradient-to-r from-[#6B0AE9] to-[#6410B1] hover:from-[#7B1AF9] hover:to-[#7420C1] hover:scale-105 cursor-pointer shadow-lg hover:shadow-xl active:scale-95'
                        }
                      `}
-                     disabled={
-                       task.status === 'completed' || 
-                       (task.status === 'in_progress' && task.progress && task.progress.current < task.progress.total)
-                     }
+                     disabled={task.status === 'completed'}
                      onClick={() => handleTaskAction(task.id)}
                    >
                      {task.status === 'completed' 
                        ? 'Done' 
-                       : (task.status === 'in_progress' && task.progress && task.progress.current < task.progress.total)
-                         ? `${task.progress.current}/${task.progress.total}`
-                         : 'Check'
+                       : 'Check'
                      }
                    </button>
                  </div>
