@@ -1,4 +1,3 @@
-// Telegram Web App SDK
 declare global {
   interface Window {
     Telegram?: {
@@ -79,6 +78,12 @@ export const getTelegramInitData = (): ParsedInitData | null => {
     const rawInitData = webApp.initData;
     console.log("Telegram Raw Init Data:", rawInitData);
     
+    // 打印详细的安全相关信息（但不在这里解析敏感数据）
+    console.log("Init Data Length:", rawInitData?.length);
+    console.log("Has User Data:", !!webApp.initDataUnsafe?.user);
+    console.log("Has Auth Date:", !!webApp.initDataUnsafe?.auth_date);
+    console.log("Has Hash:", !!webApp.initDataUnsafe?.hash);
+    
     if (!rawInitData) {
       console.log("No init data available");
       return null;
@@ -94,7 +99,7 @@ export const getTelegramInitData = (): ParsedInitData | null => {
     };
   }
   
-  console.log("Telegram Web App is not available");
+  console.log("Telegram Web App is not available",{$user: window.Telegram?.WebApp});
   return null;
 };
 
@@ -109,6 +114,9 @@ export const verifyInitData = async (
   endpoint: string = '/api/telegram/verify'
 ): Promise<VerificationResponse> => {
   try {
+    // 打印即将发送到后端的完整数据
+    console.log("Sending to backend for verification:", { initData });
+    
     // 发送到后端进行验证
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -119,6 +127,11 @@ export const verifyInitData = async (
     });
     
     const result: Record<string, unknown> = await response.json();
+    
+    // 打印后端响应的详细信息
+    console.log("Backend response status:", response.status);
+    console.log("Backend response headers:", [...response.headers.entries()]);
+    console.log("Backend response data:", result);
     
     if (response.ok) {
       console.log("Telegram init data verification successful:", result);
@@ -142,8 +155,14 @@ export const useTelegramUser = async () => {
   const initData = getTelegramInitData();
   
   if (initData) {
-    // 打印解析后的数据
-    console.log("Parsed Init Data:", initData);
+    // 打印详细的原始initData
+    console.log("Detailed Raw Init Data:", initData.rawInitData);
+    console.log("Parsed Init Data Details:", {
+      user: initData.user,
+      auth_date: initData.auth_date,
+      hash: initData.hash,
+      query_id: initData.query_id
+    });
     
     // 发送到后端验证
     const verificationResult = await verifyInitData(initData.rawInitData);
