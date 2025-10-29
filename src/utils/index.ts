@@ -3,6 +3,7 @@
 export * from './format'
 export * from './validation'
 export * from './telegramBot'
+export * from './http'
 
 /**
  * 延迟执行函数

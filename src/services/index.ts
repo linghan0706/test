@@ -1,6 +1,7 @@
 // 导出所有服务
 export * from './api'
 export * from './ton'
+export * from './apiService'
 
 // 创建服务实例
 import { TonService } from './ton'
