@@ -148,12 +148,12 @@ export default function TaskPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden pb-20 pt-0">
-      {/* 背景容器 - 根据设计图优化渐变效果 */}
+      {/* 背景容器 */}
       <div 
         className="fixed inset-0 bg-gradient-to-b from-[#5E32AC] via-[#3D1A78] to-[#1A0B2E] bg-cover bg-contain"
         style={{ backgroundImage: `url(${backImage.src})` }}
       >
-        {/* 椭圆径向渐变遮罩层 - 优化透明度和模糊效果 */}
+        {/* 椭圆径向渐变遮罩层 */}
         <div 
           className="absolute inset-0"
           style={{ 
@@ -164,7 +164,7 @@ export default function TaskPage() {
         ></div>
       </div>
       
-      {/* 头部标题区域 - 精确匹配设计图尺寸 */}
+      {/* 头部标题区域*/}
       <div className="flex flex-col items-center pt-12 sm:pt-16 space-y-3 sm:space-y-4 relative z-10 px-4">
         <h1 className="font-jersey-25 text-[32px] sm:text-[40px] leading-[40px] sm:leading-[48px] text-white font-normal tracking-wide text-center">
           Task Center
@@ -174,7 +174,7 @@ export default function TaskPage() {
         </p>
       </div>
 
-      {/* 任务列表 - 优化间距和布局，增强响应式设计 */}
+      {/* 任务列表  */}
       <div className="mt-6 sm:mt-8 px-3 sm:px-4 space-y-3 max-w-[380px] sm:max-w-[400px] mx-auto">
         {tasks.map((task, index) => (
           <motion.div
@@ -184,13 +184,13 @@ export default function TaskPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: index * 0.08 }}
           >
-            {/* 背景模糊效果 - 增强玻璃质感 */}
+            {/* 背景模糊*/}
             <div 
               className="absolute inset-0 backdrop-blur-[25px] rounded-[14px] sm:rounded-[16px] border border-white/10"
               style={{ backdropFilter: 'blur(25px)' }}
             />
             
-            {/* 主背景 - 优化颜色和透明度 */}
+            {/* 主背景  */}
             <div 
               className="absolute inset-0 rounded-[14px] sm:rounded-[16px]" 
               style={{
@@ -203,7 +203,7 @@ export default function TaskPage() {
             <div className="relative w-full h-full flex items-center px-3 sm:px-4">
               {/* 左侧图标和文本区域 */}
               <div className="flex items-center flex-1 min-w-0">
-                {/* 图标容器 - 优化尺寸和样式 */}
+                {/* 图标容器  */}
                 <div className="w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center relative flex-shrink-0">
                   {/* 图标背景圆圈 */}
                   <div 
@@ -219,7 +219,7 @@ export default function TaskPage() {
                 
                 {/* 文本信息 */}
                 <div className="ml-3 sm:ml-4 flex-1 min-w-0">
-                  {/* 任务标题 - 优化字体大小和行高 */}
+                  {/* 任务标题 */}
                   <div className="text-white text-[18px] sm:text-[20px] leading-[22px] sm:leading-[24px] font-normal font-jersey-25 mb-1 truncate">
                     {task.title}
                   </div>
@@ -256,7 +256,7 @@ export default function TaskPage() {
                   </div>
                 )}
                 
-                {/* 按钮 - 优化样式和交互 */}
+                {/* Check 按钮  */}
                  <div className="flex-shrink-0">
                    <button
                      className={`
