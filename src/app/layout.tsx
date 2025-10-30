@@ -7,7 +7,6 @@ import { ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { MainLayout } from '@/components/layout'
 import { LoadingProvider } from '@/components/ui/LoadingProvider'
-import { getTelegramUser } from '@/utils/telegramBot'
 
 // 在服务端调用会失败，因为 window 对象不存在
 // console.log("userData", getTelegramUser());

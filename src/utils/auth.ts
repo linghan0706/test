@@ -51,7 +51,7 @@ export const setUserInfo = (user: TelegramUser): void => {
 export const getUserInfo = (): TelegramUser | null => {
   if (typeof window !== 'undefined') {
     const userStr = localStorage.getItem(USER_KEY)
-    return userStr ? JSON.parse(userStr) : null
+    return userStr ? JSON.parse(userStr) as TelegramUser : null
   }
   return null
 }

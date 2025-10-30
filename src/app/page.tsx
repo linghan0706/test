@@ -8,7 +8,6 @@ import http from '@/utils/http'
 import { LoginResponse } from '@/types/api'
 
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(false)
   const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
@@ -20,7 +19,6 @@ export default function HomePage() {
     }
 
     const fetchTelegramData = async () => {
-      setIsLoading(true)
       setLoginStatus('loading')
       
       try {
@@ -61,7 +59,7 @@ export default function HomePage() {
         setErrorMessage('网络请求失败，请稍后重试')
         setLoginStatus('error')
       } finally {
-        setIsLoading(false)
+        // 不需要额外的loading状态设置，loginStatus已经处理了状态
       }
     }
     

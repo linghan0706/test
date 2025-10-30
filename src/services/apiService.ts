@@ -104,7 +104,9 @@ export const tonService = {
 };
 
 // 默认导出所有服务
-export default {
+const apiService = {
   user: userService,
   ton: tonService
 };
+
+export default apiService;

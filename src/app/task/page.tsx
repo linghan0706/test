@@ -129,23 +129,6 @@ export default function TaskPage() {
     )
   }
 
-  const addTask = (newTask: Omit<Task, 'id'>) => {
-    const id = Math.max(...tasks.map(t => t.id)) + 1
-    setTasks(prevTasks => [...prevTasks, { ...newTask, id }])
-  }
-
-  const deleteTask = (taskId: number) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId))
-  }
-
-  const updateTaskStatus = (taskId: number, newStatus: TaskStatus) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
-    )
-  }
-
   return (
     <div className="min-h-screen relative overflow-hidden pb-20 pt-10 sm:pt-14">
       {/* 背景容器 */}
