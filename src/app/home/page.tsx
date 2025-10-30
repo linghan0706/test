@@ -2,15 +2,27 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { getTelegramInitData } from '@/utils/telegramBot'
+import { getTelegramInitData, isTelegramEnvironment, getTelegramDebugInfo } from '@/utils/telegramBot'
 import { setAuthToken, setUserInfo, isAuthenticated } from '@/utils/auth'
 import http from '@/utils/http'
 import { LoginResponse } from '@/types/api'
 export default function HomePage() {
   const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const [debugInfo, setDebugInfo] = useState<{
+    hasTelegramWebApp: boolean
+    hasInitData: boolean
+    userAgent: string
+    url: string
+    webAppData?: Record<string, unknown>
+  } | null>(null)
 
   useEffect(() => {
+    // 获取调试信息
+    const debug = getTelegramDebugInfo()
+    setDebugInfo(debug)
+    console.log('Telegram 调试信息:', debug)
+    
     // 如果已经登录，跳过登录流程
     if (isAuthenticated()) {
       setLoginStatus('success')
@@ -24,11 +36,29 @@ export default function HomePage() {
         const initData = getTelegramInitData()
         console.log("Telegram Init Data:", initData)
         
+        // 在 Telegram Web App 环境中，如果没有获取到数据，可能是调试模式
         if (!initData) {
-          console.log('未获取到 Telegram 初始化数据')
-          setErrorMessage('未获取到 Telegram 初始化数据')
-          setLoginStatus('error')
-          return
+          console.log('未获取到 Telegram 初始化数据，可能处于调试模式')
+          
+          // 检查是否在 Telegram 环境中
+          if (isTelegramEnvironment()) {
+            setErrorMessage('Telegram 数据加载中，请稍候...')
+            // 在真实 Telegram 环境中，可以尝试重新获取
+            setTimeout(() => {
+              const retryData = getTelegramInitData()
+              if (!retryData) {
+                setErrorMessage('无法获取 Telegram 用户数据，请检查应用是否在 Telegram 中正确打开')
+                setLoginStatus('error')
+              }
+            }, 2000) // 增加等待时间到2秒
+            return
+          } else {
+            // 调试模式：提供模拟数据或跳过验证
+            console.log('调试模式：跳过 Telegram 验证')
+            setErrorMessage('调试模式：未连接到 Telegram')
+            setLoginStatus('error')
+            return
+          }
         }
         
         // 发送到后端验证
@@ -57,8 +87,6 @@ export default function HomePage() {
         console.error('Telegram用户验证请求失败', (error as Error).message)
         setErrorMessage('网络请求失败，请稍后重试')
         setLoginStatus('error')
-      } finally {
-        // 不需要额外的loading状态设置，loginStatus已经处理了状态
       }
     }
     
@@ -94,7 +122,52 @@ export default function HomePage() {
             <div className="mb-4">
               <p className="text-red-400">✗ 验证失败</p>
               {errorMessage && (
-                <p className="text-red-300 text-sm mt-2">{errorMessage}</p>
+                <div className="mt-2">
+                  <p className="text-red-300 text-sm">{errorMessage}</p>
+                  {errorMessage.includes('Telegram') && (
+                    <div className="mt-3 p-3 bg-blue-900/30 rounded-lg border border-blue-500/30">
+                      <p className="text-blue-300 text-sm">
+                        💡 <strong>提示：</strong>
+                      </p>
+                      <p className="text-blue-200 text-xs mt-1">
+                        • 请在 Telegram 应用中打开此链接<br/>
+                        • 或通过 Telegram Bot 访问此应用<br/>
+                        • 普通浏览器无法获取 Telegram 用户数据
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* 调试信息显示 */}
+                  {debugInfo && (
+                    <details className="mt-3 p-3 bg-gray-900/50 rounded-lg border border-gray-600/30">
+                      <summary className="text-gray-300 text-xs cursor-pointer hover:text-white">
+                        🔍 调试信息 (点击展开)
+                      </summary>
+                      <div className="mt-2 text-xs text-gray-400 font-mono">
+                        <div className="mb-2">
+                          <span className="text-gray-300">Telegram Web App:</span> {debugInfo.hasTelegramWebApp ? '✓' : '✗'}
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-gray-300">初始化数据:</span> {debugInfo.hasInitData ? '✓' : '✗'}
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-gray-300">User Agent:</span> {debugInfo.userAgent.substring(0, 50)}...
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-gray-300">当前 URL:</span> {debugInfo.url.substring(0, 50)}...
+                        </div>
+                        {debugInfo.webAppData && (
+                          <div className="mt-2 p-2 bg-gray-800/50 rounded">
+                            <div className="text-gray-300 mb-1">Web App 数据:</div>
+                            <pre className="text-xs overflow-x-auto">
+                              {JSON.stringify(debugInfo.webAppData, null, 2)}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  )}
+                </div>
               )}
             </div>
           )}

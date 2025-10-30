@@ -9,6 +9,13 @@ declare global {
           hash?: string;
           query_id?: string;
         };
+        version?: string;
+        platform?: string;
+        colorScheme?: string;
+        themeParams?: Record<string, unknown>;
+        isExpanded?: boolean;
+        viewportHeight?: number;
+        viewportStableHeight?: number;
       };
     };
   }
@@ -39,6 +46,65 @@ export interface ParsedInitData {
   hash?: string;
   query_id?: string;
   rawInitData: string;
+}
+
+/**
+ * 检测是否在 Telegram Web App 环境中运行
+ * @returns {boolean} 是否在 Telegram 环境中
+ */
+export function isTelegramEnvironment(): boolean {
+  // 检查 Telegram Web App SDK
+  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+    return true
+  }
+  
+  // 检查 URL 中是否包含 tgWebAppData
+  if (typeof window !== 'undefined' && window.location.hash.includes('tgWebAppData=')) {
+    return true
+  }
+  
+  // 检查 User Agent 是否包含 Telegram 相关信息
+  if (typeof navigator !== 'undefined' && navigator.userAgent.includes('Telegram')) {
+    return true
+  }
+  
+  return false
+}
+
+/**
+ * 获取 Telegram Web App 调试信息
+ * @returns {object} 调试信息对象
+ */
+export function getTelegramDebugInfo(): {
+  hasTelegramWebApp: boolean
+  hasInitData: boolean
+  userAgent: string
+  url: string
+  webAppData?: Record<string, unknown>
+} {
+  const debugInfo = {
+    hasTelegramWebApp: typeof window !== 'undefined' && !!window.Telegram?.WebApp,
+    hasInitData: typeof window !== 'undefined' && window.location.hash.includes('tgWebAppData='),
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    webAppData: undefined as Record<string, unknown> | undefined
+  }
+  
+  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+    debugInfo.webAppData = {
+      initData: window.Telegram.WebApp.initData,
+      initDataUnsafe: window.Telegram.WebApp.initDataUnsafe,
+      version: window.Telegram.WebApp.version,
+      platform: window.Telegram.WebApp.platform,
+      colorScheme: window.Telegram.WebApp.colorScheme,
+      themeParams: window.Telegram.WebApp.themeParams,
+      isExpanded: window.Telegram.WebApp.isExpanded,
+      viewportHeight: window.Telegram.WebApp.viewportHeight,
+      viewportStableHeight: window.Telegram.WebApp.viewportStableHeight
+    }
+  }
+  
+  return debugInfo
 }
 
 /**
@@ -123,35 +189,85 @@ export const getTelegramUser = (): TelegramUser | null => {
  * @returns 解析后的初始化数据
  */
 export const getTelegramInitData = (): ParsedInitData | null => {
+  console.log('开始获取 Telegram 初始化数据...')
+  
+  // 获取调试信息
+  const debugInfo = getTelegramDebugInfo()
+  console.log('Telegram 环境调试信息:', debugInfo)
+  
   // 首先检查 Telegram Web App SDK 是否可用
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-    const webApp = window.Telegram.WebApp;
+    const webApp = window.Telegram.WebApp
+    console.log('检测到 Telegram Web App SDK')
     
     // 获取原始初始化数据
-    const rawInitData = webApp.initData;
+    const rawInitData = webApp.initData
+    console.log('原始初始化数据:', rawInitData)
     
     if (!rawInitData) {
-      return null;
-    
+      console.log('警告: Telegram Web App SDK 可用但没有初始化数据')
+      
+      // 在调试模式下，检查是否有 initDataUnsafe
+      if (webApp.initDataUnsafe && Object.keys(webApp.initDataUnsafe).length > 0) {
+        console.log('发现 initDataUnsafe 数据:', webApp.initDataUnsafe)
+        
+        // 尝试构造一个基本的 rawInitData
+        const constructedData = new URLSearchParams()
+        if (webApp.initDataUnsafe.user) {
+          constructedData.append('user', JSON.stringify(webApp.initDataUnsafe.user))
+        }
+        if (webApp.initDataUnsafe.auth_date) {
+          constructedData.append('auth_date', webApp.initDataUnsafe.auth_date.toString())
+        }
+        if (webApp.initDataUnsafe.hash) {
+          constructedData.append('hash', webApp.initDataUnsafe.hash)
+        }
+        if (webApp.initDataUnsafe.query_id) {
+          constructedData.append('query_id', webApp.initDataUnsafe.query_id)
+        }
+        
+        const constructedRawData = constructedData.toString()
+        console.log('构造的原始数据:', constructedRawData)
+        
+        if (constructedRawData) {
+          return {
+            user: webApp.initDataUnsafe.user,
+            auth_date: webApp.initDataUnsafe.auth_date,
+            hash: webApp.initDataUnsafe.hash,
+            query_id: webApp.initDataUnsafe.query_id,
+            rawInitData: constructedRawData
+          }
+        }
+      }
+      
+      return null
     }
     
     // 返回解析后的数据
-    return {
+    const result = {
       user: webApp.initDataUnsafe?.user,
       auth_date: webApp.initDataUnsafe?.auth_date, 
       hash: webApp.initDataUnsafe?.hash,
+      query_id: webApp.initDataUnsafe?.query_id,
       rawInitData: rawInitData
-    };
+    }
+    
+    console.log('从 Telegram Web App SDK 获取的数据:', result)
+    return result
   }
+  
+  console.log('Telegram Web App SDK 不可用，尝试从 URL 解析数据')
   
   // 如果 SDK 不可用，尝试从 URL 解析数据
-  const urlData = parseTelegramDataFromUrl();
+  const urlData = parseTelegramDataFromUrl()
   if (urlData) {
-    return urlData;
+    console.log('从 URL 解析的数据:', urlData)
+    return urlData
   }
   
-  return null;
-};
+  console.log('无法获取 Telegram 初始化数据')
+  return null
+}
 
 /**
  * 获取格式化的 Telegram 初始化数据字符串
