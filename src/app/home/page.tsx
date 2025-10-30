@@ -1,17 +1,64 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { getTelegramInitData } from '@/utils/telegramBot'
-
+import { setAuthToken, setUserInfo, isAuthenticated } from '@/utils/auth'
+import http from '@/utils/http'
+import { LoginResponse } from '@/types/api'
 export default function HomePage() {
+  const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState<string>('')
+
   useEffect(() => {
-    // 在客户端环境中获取 Telegram 用户数据
-    const fetchTelegramData = () => {
-      const initData = getTelegramInitData()
-      if (initData) {
-        // 只需要返回 initData，不发送到后端验证
+    // 如果已经登录，跳过登录流程
+    if (isAuthenticated()) {
+      setLoginStatus('success')
+      return
+    }
+
+    const fetchTelegramData = async () => {
+      setLoginStatus('loading')
+      
+      try {
+        const initData = getTelegramInitData()
         console.log("Telegram Init Data:", initData)
+        
+        if (!initData) {
+          console.log('未获取到 Telegram 初始化数据')
+          setErrorMessage('未获取到 Telegram 初始化数据')
+          setLoginStatus('error')
+          return
+        }
+        
+        // 发送到后端验证
+        const response = await http.post<LoginResponse>('/api/auth/login', {
+          initData: initData.rawInitData
+        })
+        
+        if (response.data.success) {
+          console.log('Telegram用户验证成功', response.data.user)
+          
+          // 存储Token和用户信息
+          if (response.data.token) {
+            setAuthToken(response.data.token)
+          }
+          if (response.data.user) {
+            setUserInfo(response.data.user)
+          }
+          
+          setLoginStatus('success')
+        } else {
+          console.log('Telegram用户验证失败', response.data.message)
+          setErrorMessage(response.data.message || '验证失败')
+          setLoginStatus('error')
+        }
+      } catch (error) {
+        console.error('Telegram用户验证请求失败', (error as Error).message)
+        setErrorMessage('网络请求失败，请稍后重试')
+        setLoginStatus('error')
+      } finally {
+        // 不需要额外的loading状态设置，loginStatus已经处理了状态
       }
     }
     
@@ -29,6 +76,29 @@ export default function HomePage() {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-white text-2xl font-bold mb-4">个人中心</h1>
+          
+          {/* 登录状态显示 */}
+          {loginStatus === 'loading' && (
+            <div className="mb-4">
+              <p className="text-blue-400">正在验证用户身份...</p>
+            </div>
+          )}
+          
+          {loginStatus === 'success' && (
+            <div className="mb-4">
+              <p className="text-green-400">✓ 用户验证成功</p>
+            </div>
+          )}
+          
+          {loginStatus === 'error' && (
+            <div className="mb-4">
+              <p className="text-red-400">✗ 验证失败</p>
+              {errorMessage && (
+                <p className="text-red-300 text-sm mt-2">{errorMessage}</p>
+              )}
+            </div>
+          )}
+          
           <p className="text-gray-400">个人中心功能开发中...</p>
         </motion.div>
       </div>
