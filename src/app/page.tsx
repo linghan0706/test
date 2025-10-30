@@ -25,7 +25,7 @@ export default function HomePage() {
     const fetchTelegramData = async () => {
       try {
         const initData = getTelegramInitData()
-        
+        console.log("Telegram Init Data:", initData)
         if (!initData) {
           console.log('未获取到 Telegram 初始化数据')
           return
