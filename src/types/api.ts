@@ -39,3 +39,30 @@ export interface ErrorResponse {
   message: string
   details?: Record<string, unknown> | null
 }
+
+// Telegram 登录相关类型
+export interface TelegramUser {
+  id: number
+  first_name: string
+  last_name?: string
+  username?: string
+  language_code: string
+  is_premium?: boolean
+}
+
+export interface LoginRequest {
+  initData: string
+}
+
+export interface LoginResponse {
+  success: boolean
+  user?: TelegramUser
+  token?: string
+  message?: string
+}
+
+export interface AuthTokens {
+  accessToken: string
+  refreshToken?: string
+  expiresIn?: number
+}
