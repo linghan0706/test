@@ -1,3 +1,5 @@
+import { useWebApp, useInitData, WebAppUser } from '@vkruglikov/react-telegram-web-app';
+
 declare global {
   interface Window {
     Telegram?: {
@@ -26,7 +28,7 @@ export interface TelegramUser {
   first_name: string;
   last_name?: string;
   username?: string;
-  language_code: string;
+  language_code?: string;
   is_premium?: boolean;
   added_to_attachment_menu?: boolean;
   allows_write_to_pm?: boolean;
@@ -47,6 +49,26 @@ export interface ParsedInitData {
   query_id?: string;
   rawInitData: string;
 }
+
+/**
+ * 将 WebAppUser 转换为 TelegramUser
+ * 处理类型差异和属性映射
+ */
+const convertWebAppUserToTelegramUser = (webAppUser: WebAppUser): TelegramUser => {
+  return {
+    id: webAppUser.id,
+    first_name: webAppUser.first_name,
+    last_name: webAppUser.last_name,
+    username: webAppUser.username,
+    language_code: webAppUser.language_code,
+    // WebAppUser 中没有这些属性，设置为默认值
+    is_premium: undefined,
+    added_to_attachment_menu: undefined,
+    allows_write_to_pm: undefined,
+    // 处理 photo_url 的类型差异：WebAppUser 中是 true | undefined
+    photo_url: webAppUser.photo_url === true ? undefined : undefined,
+  };
+};
 
 /**
  * 检测是否在 Telegram Web App 环境中运行
@@ -108,172 +130,121 @@ export function getTelegramDebugInfo(): {
 }
 
 /**
- * 从 URL 中解析 Telegram Web App 数据
- * @returns Telegram 初始化数据或 null
- */
-const parseTelegramDataFromUrl = (): ParsedInitData | null => {
-  if (typeof window === 'undefined') return null;
-  
-  try {
-    // 获取当前 URL
-    const url = new URL(window.location.href);
-    const tgWebAppData = url.hash.match(/tgWebAppData=([^&]*)/);
-    
-    if (!tgWebAppData || !tgWebAppData[1]) {
-      return null;
-    }
-    
-    // 解码 URL 编码的数据
-    const decodedData = decodeURIComponent(tgWebAppData[1]);
-    
-    // 解析参数
-    const params = new URLSearchParams(decodedData);
-    const userData = params.get('user');
-    const authDate = params.get('auth_date');
-    const hash = params.get('hash');
-    const queryId = params.get('query_id');
-    
-    if (!userData) {
-      return null;
-    }
-    
-    // 解析用户数据
-    let user: TelegramUser | null = null;
-    try {
-      user = JSON.parse(decodeURIComponent(userData));
-    } catch {
-      return null;
-    }
-    
-    // 构造返回数据
-    const parsedData: ParsedInitData = {
-      user: user || undefined,
-      auth_date: authDate ? parseInt(authDate, 10) : undefined,
-      hash: hash || undefined,
-      query_id: queryId || undefined,
-      rawInitData: decodedData
-    };
-    
-    return parsedData;
-  } catch {
-    return null;
-  }
-};
-
-/**
- * 获取 Telegram 用户数据
+ * React Hook: 获取当前 Telegram 用户信息
+ * 使用 @vkruglikov/react-telegram-web-app 库
  * @returns Telegram 用户数据或 null
  */
-export const getTelegramUser = (): TelegramUser | null => {
-  // 首先检查 Telegram Web App SDK 是否可用
-  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-    const webApp = window.Telegram.WebApp;
-    
-    // 获取用户信息
-    const user = webApp.initDataUnsafe?.user;
-    
-    return user || null;
+export const useTelegramUser = (): TelegramUser | null => {
+  const [initDataUnsafe] = useInitData();
+  
+  if (!initDataUnsafe?.user) {
+    return null;
   }
   
-  // 如果 SDK 不可用，尝试从 URL 解析数据
-  const urlData = parseTelegramDataFromUrl();
-  if (urlData?.user) {
-    return urlData.user;
-  }
-  
-  return null;
+  return convertWebAppUserToTelegramUser(initDataUnsafe.user);
 };
 
 /**
- * 获取完整的 Telegram 初始化数据
+ * React Hook: 获取完整的 Telegram 初始化数据
+ * 使用 @vkruglikov/react-telegram-web-app 库
  * @returns 解析后的初始化数据
  */
-export const getTelegramInitData = (): ParsedInitData | null => {
+export const useTelegramInitData = (): ParsedInitData | null => {
+  const webApp = useWebApp();
+  const [initDataUnsafe, initData] = useInitData();
+  
   console.log('开始获取 Telegram 初始化数据...')
   
   // 获取调试信息
   const debugInfo = getTelegramDebugInfo()
   console.log('Telegram 环境调试信息:', debugInfo)
   
+  if (!webApp || !initData) {
+    console.log('无法获取 Telegram 初始化数据')
+    return null;
+  }
+  
+  console.log('从 @vkruglikov/react-telegram-web-app 获取的数据:', {
+    user: initDataUnsafe?.user,
+    auth_date: initDataUnsafe?.auth_date,
+    hash: initDataUnsafe?.hash,
+    query_id: initDataUnsafe?.query_id,
+    rawInitData: initData
+  })
+  
+  return {
+    user: initDataUnsafe?.user ? convertWebAppUserToTelegramUser(initDataUnsafe.user) : undefined,
+    auth_date: initDataUnsafe?.auth_date,
+    hash: initDataUnsafe?.hash,
+    query_id: initDataUnsafe?.query_id,
+    rawInitData: initData
+  };
+};
+
+/**
+ * React Hook: 获取 Telegram WebApp 实例
+ * 使用 @vkruglikov/react-telegram-web-app 库
+ * @returns Telegram WebApp 实例
+ */
+export const useTelegramWebApp = () => {
+  return useWebApp();
+};
+
+// 兼容性函数 - 保持向后兼容
+/**
+ * 获取 Telegram 用户数据 (兼容性函数)
+ * @deprecated 请使用 useTelegramUser hook 替代
+ * @returns Telegram 用户数据或 null
+ */
+export const getTelegramUser = (): TelegramUser | null => {
+  console.warn('getTelegramUser 已废弃，请在 React 组件中使用 useTelegramUser hook');
+  
   // 首先检查 Telegram Web App SDK 是否可用
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+    const webApp = window.Telegram.WebApp;
+    const user = webApp.initDataUnsafe?.user;
+    return user || null;
+  }
+  
+  return null;
+};
+
+/**
+ * 获取完整的 Telegram 初始化数据 (兼容性函数)
+ * @deprecated 请使用 useTelegramInitData hook 替代
+ * @returns 解析后的初始化数据
+ */
+export const getTelegramInitData = (): ParsedInitData | null => {
+  console.warn('getTelegramInitData 已废弃，请在 React 组件中使用 useTelegramInitData hook');
+  
+  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     const webApp = window.Telegram.WebApp
-    console.log('检测到 Telegram Web App SDK')
-    
-    // 获取原始初始化数据
     const rawInitData = webApp.initData
-    console.log('原始初始化数据:', rawInitData)
     
     if (!rawInitData) {
-      console.log('警告: Telegram Web App SDK 可用但没有初始化数据')
-      
-      // 在调试模式下，检查是否有 initDataUnsafe
-      if (webApp.initDataUnsafe && Object.keys(webApp.initDataUnsafe).length > 0) {
-        console.log('发现 initDataUnsafe 数据:', webApp.initDataUnsafe)
-        
-        // 尝试构造一个基本的 rawInitData
-        const constructedData = new URLSearchParams()
-        if (webApp.initDataUnsafe.user) {
-          constructedData.append('user', JSON.stringify(webApp.initDataUnsafe.user))
-        }
-        if (webApp.initDataUnsafe.auth_date) {
-          constructedData.append('auth_date', webApp.initDataUnsafe.auth_date.toString())
-        }
-        if (webApp.initDataUnsafe.hash) {
-          constructedData.append('hash', webApp.initDataUnsafe.hash)
-        }
-        if (webApp.initDataUnsafe.query_id) {
-          constructedData.append('query_id', webApp.initDataUnsafe.query_id)
-        }
-        
-        const constructedRawData = constructedData.toString()
-        console.log('构造的原始数据:', constructedRawData)
-        
-        if (constructedRawData) {
-          return {
-            user: webApp.initDataUnsafe.user,
-            auth_date: webApp.initDataUnsafe.auth_date,
-            hash: webApp.initDataUnsafe.hash,
-            query_id: webApp.initDataUnsafe.query_id,
-            rawInitData: constructedRawData
-          }
-        }
-      }
-      
       return null
     }
     
-    // 返回解析后的数据
-    const result = {
+    return {
       user: webApp.initDataUnsafe?.user,
       auth_date: webApp.initDataUnsafe?.auth_date, 
       hash: webApp.initDataUnsafe?.hash,
       query_id: webApp.initDataUnsafe?.query_id,
       rawInitData: rawInitData
     }
-    
-    console.log('从 Telegram Web App SDK 获取的数据:', result)
-    return result
   }
   
-  console.log('Telegram Web App SDK 不可用，尝试从 URL 解析数据')
-  
-  // 如果 SDK 不可用，尝试从 URL 解析数据
-  const urlData = parseTelegramDataFromUrl()
-  if (urlData) {
-    console.log('从 URL 解析的数据:', urlData)
-    return urlData
-  }
-  
-  console.log('无法获取 Telegram 初始化数据')
   return null
 }
 
 /**
- * 获取格式化的 Telegram 初始化数据字符串
+ * 获取格式化的 Telegram 初始化数据字符串 (兼容性函数)
+ * @deprecated 请使用 useTelegramInitData hook 替代
  * @returns 格式化的初始化数据字符串
  */
 export const getFormattedTelegramInitData = (): string | null => {
+  console.warn('getFormattedTelegramInitData 已废弃，请在 React 组件中使用 useTelegramInitData hook');
+  
   const initData = getTelegramInitData();
   
   if (!initData) {
@@ -291,3 +262,36 @@ user=${JSON.stringify(user)}&auth_date=${auth_date}&hash=${hash}`;
   
   return formattedString;
 };
+
+// 示例组件用法
+/*
+import { WebAppProvider } from '@vkruglikov/react-telegram-web-app';
+import { useTelegramUser, useTelegramInitData, useTelegramWebApp } from './utils/telegramBot';
+
+function MyComponent() {
+  const webApp = useTelegramWebApp();
+  const user = useTelegramUser();
+  const initData = useTelegramInitData();
+
+  useEffect(() => {
+    if (webApp) {
+      // 获取 initData
+      console.log("initData:", initData?.rawInitData);
+
+      // 获取用户信息（直接解析）
+      console.log("User:", user);
+    }
+  }, [webApp, user, initData]);
+
+  return <div>...</div>;
+}
+
+// 在应用根部使用 WebAppProvider
+function App() {
+  return (
+    <WebAppProvider>
+      <MyComponent />
+    </WebAppProvider>
+  );
+}
+*/

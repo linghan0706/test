@@ -1,4 +1,5 @@
-import { TonClient, WalletContractV4, Address } from '@ton/ton'
+import { TonClient, WalletContractV4 } from '@ton/ton'
+import { Address } from '@ton/core'
 import { mnemonicToWalletKey } from '@ton/crypto'
 import { TonApiClient } from '@ton-api/client'
 import { tonApiConfig, networkConfig, DEFAULT_NETWORK } from './ton-config'
