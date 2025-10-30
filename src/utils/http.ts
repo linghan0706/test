@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig, A
 
 // 创建 axios 实例
 const http: AxiosInstance = axios.create({
-  baseURL: process.env.End_SERVICE_HOST || 'http://localhost:3000/api',
+  baseURL: process.env.End_SERVICE_HOST || 'http://localhost:8081/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

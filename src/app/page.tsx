@@ -34,7 +34,7 @@ export default function HomePage() {
         // 发送到后端验证
         const validateTg = async () => { 
           try {
-            const response = await http.post<ValidateResponse>('/telegram/verify', {
+            const response = await http.post<ValidateResponse>('/api/auth/login', {
               initData: initData.rawInitData
             })
             
