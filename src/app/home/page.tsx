@@ -2,10 +2,11 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { getTelegramInitData, isTelegramEnvironment, getTelegramDebugInfo } from '@/utils/telegramBot'
+import { useTelegramUser, useTelegramInitData, isTelegramEnvironment, getTelegramDebugInfo } from '@/utils/telegramBot'
 import { setAuthToken, setUserInfo, isAuthenticated } from '@/utils/auth'
 import http from '@/utils/http'
 import { LoginResponse } from '@/types/api'
+
 export default function HomePage() {
   const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
@@ -16,6 +17,10 @@ export default function HomePage() {
     url: string
     webAppData?: Record<string, unknown>
   } | null>(null)
+
+  // 使用新的 hooks
+  const telegramUser = useTelegramUser()
+  const telegramInitData = useTelegramInitData()
 
   useEffect(() => {
     // 获取调试信息
@@ -29,41 +34,29 @@ export default function HomePage() {
       return
     }
 
-    const fetchTelegramData = async () => {
+    const handleLogin = async () => {
       setLoginStatus('loading')
       
       try {
-        const initData = getTelegramInitData()
-        console.log("Telegram Init Data:", initData)
+        console.log("Telegram User:", telegramUser)
+        console.log("Telegram Init Data:", telegramInitData)
         
-        // 在 Telegram Web App 环境中，如果没有获取到数据，可能是调试模式
-        if (!initData) {
-          console.log('未获取到 Telegram 初始化数据，可能处于调试模式')
-          
-          // 检查是否在 Telegram 环境中
+        // 检查是否获取到用户数据
+        if (!telegramUser || !telegramInitData) {
           if (isTelegramEnvironment()) {
             setErrorMessage('Telegram 数据加载中，请稍候...')
-            // 在真实 Telegram 环境中，可以尝试重新获取
-            setTimeout(() => {
-              const retryData = getTelegramInitData()
-              if (!retryData) {
-                setErrorMessage('无法获取 Telegram 用户数据，请检查应用是否在 Telegram 中正确打开')
-                setLoginStatus('error')
-              }
-            }, 2000) // 增加等待时间到2秒
-            return
+            setLoginStatus('error')
           } else {
-            // 调试模式：提供模拟数据或跳过验证
             console.log('调试模式：跳过 Telegram 验证')
             setErrorMessage('调试模式：未连接到 Telegram')
             setLoginStatus('error')
-            return
           }
+          return
         }
         
         // 发送到后端验证
         const response = await http.post<LoginResponse>('/api/auth/login', {
-          initData: initData.rawInitData
+          initData: telegramInitData.rawInitData
         })
         
         if (response.data.success) {
@@ -90,8 +83,8 @@ export default function HomePage() {
       }
     }
     
-    fetchTelegramData()
-  }, [])
+    handleLogin()
+  }, [telegramUser, telegramInitData]) // 依赖于 hooks 的返回值
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black relative overflow-hidden pb-20">
@@ -104,6 +97,16 @@ export default function HomePage() {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-white text-2xl font-bold mb-4">个人中心</h1>
+          
+          {/* 用户信息显示 */}
+          {telegramUser && (
+            <div className="mb-4 p-4 bg-blue-900/30 rounded-lg border border-blue-500/30">
+              <p className="text-blue-300 text-sm mb-2">👋 欢迎，{telegramUser.first_name}!</p>
+              {telegramUser.username && (
+                <p className="text-blue-200 text-xs">@{telegramUser.username}</p>
+              )}
+            </div>
+          )}
           
           {/* 登录状态显示 */}
           {loginStatus === 'loading' && (
