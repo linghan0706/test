@@ -75,7 +75,7 @@ const parseTelegramDataFromUrl = (): ParsedInitData | null => {
     let user: TelegramUser | null = null;
     try {
       user = JSON.parse(decodeURIComponent(userData));
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
     
@@ -89,7 +89,7 @@ const parseTelegramDataFromUrl = (): ParsedInitData | null => {
     };
     
     return parsedData;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

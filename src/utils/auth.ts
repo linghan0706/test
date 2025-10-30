@@ -2,6 +2,8 @@
  * 认证相关工具函数
  */
 
+import { TelegramUser } from '@/types/api'
+
 const TOKEN_KEY = 'auth_token'
 const USER_KEY = 'user_info'
 
@@ -37,7 +39,7 @@ export const clearAuthToken = (): void => {
 /**
  * 存储用户信息
  */
-export const setUserInfo = (user: any): void => {
+export const setUserInfo = (user: TelegramUser): void => {
   if (typeof window !== 'undefined') {
     localStorage.setItem(USER_KEY, JSON.stringify(user))
   }
@@ -46,7 +48,7 @@ export const setUserInfo = (user: any): void => {
 /**
  * 获取用户信息
  */
-export const getUserInfo = (): any | null => {
+export const getUserInfo = (): TelegramUser | null => {
   if (typeof window !== 'undefined') {
     const userStr = localStorage.getItem(USER_KEY)
     return userStr ? JSON.parse(userStr) : null
