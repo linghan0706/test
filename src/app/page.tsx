@@ -35,7 +35,7 @@ export default function HomePage() {
         }
         
         // 发送到后端验证
-        const response = await http.post<LoginResponse>('/auth/login', {
+        const response = await http.post<LoginResponse>('/api/auth/login', {
           initData: initData.rawInitData
         })
         
