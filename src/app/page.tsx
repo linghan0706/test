@@ -3,14 +3,26 @@
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
 import { getTelegramInitData } from '@/utils/telegramBot'
+import axios from 'axios'
 
 export default function HomePage() {
   useEffect(() => {
     const fetchTelegramData = () => {
       const initData = getTelegramInitData()
-      if (initData) {
-        // 只需要返回 initData，不发送到后端验证
-        console.log("返回Telegram Init Data:", initData)
+      // 发送到后端验证
+      const uValidateTg = async () => { 
+          const response = await axios('/api', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ initData }),
+          })
+          if (response.ok) {
+            console.log('Telegram用户验证成功')
+          } else {
+            console.log('Telegram用户验证失败')
+          }
       }
     }
     

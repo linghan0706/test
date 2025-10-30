@@ -138,9 +138,8 @@ export const getTelegramInitData = (): ParsedInitData | null => {
     // 返回解析后的数据
     return {
       user: webApp.initDataUnsafe?.user,
-      auth_date: webApp.initDataUnsafe?.auth_date,
+      auth_date: webApp.initDataUnsafe?.auth_date, 
       hash: webApp.initDataUnsafe?.hash,
-      query_id: webApp.initDataUnsafe?.query_id,
       rawInitData
     };
   }
