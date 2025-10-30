@@ -140,7 +140,7 @@ export const getTelegramInitData = (): ParsedInitData | null => {
       user: webApp.initDataUnsafe?.user,
       auth_date: webApp.initDataUnsafe?.auth_date, 
       hash: webApp.initDataUnsafe?.hash,
-      rawInitData
+      rawInitData: rawInitData
     };
   }
   
@@ -151,4 +151,27 @@ export const getTelegramInitData = (): ParsedInitData | null => {
   }
   
   return null;
+};
+
+/**
+ * 获取格式化的 Telegram 初始化数据字符串
+ * @returns 格式化的初始化数据字符串
+ */
+export const getFormattedTelegramInitData = (): string | null => {
+  const initData = getTelegramInitData();
+  
+  if (!initData) {
+    return null;
+  }
+  
+  const { user, auth_date, hash } = initData;
+  
+  // 构造格式化的字符串
+  const formattedString = `// 完整格式示例
+const initData = "user=${encodeURIComponent(JSON.stringify(user))}&auth_date=${auth_date}&hash=${hash}";
+
+// URL解码后的格式
+user=${JSON.stringify(user)}&auth_date=${auth_date}&hash=${hash}`;
+  
+  return formattedString;
 };

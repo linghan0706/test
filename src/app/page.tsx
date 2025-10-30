@@ -3,26 +3,54 @@
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
 import { getTelegramInitData } from '@/utils/telegramBot'
-import axios from 'axios'
+import http from '@/utils/http'
+
+interface TelegramUser {
+  id: number
+  first_name: string
+  last_name?: string
+  username?: string
+  language_code: string
+  is_premium?: boolean
+}
+
+interface ValidateResponse {
+  success: boolean
+  user?: TelegramUser
+  message?: string
+}
 
 export default function HomePage() {
   useEffect(() => {
-    const fetchTelegramData = () => {
-      const initData = getTelegramInitData()
-      // 发送到后端验证
-      const uValidateTg = async () => { 
-          const response = await axios('/api', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ initData }),
-          })
-          if (response.ok) {
-            console.log('Telegram用户验证成功')
-          } else {
-            console.log('Telegram用户验证失败')
+    const fetchTelegramData = async () => {
+      try {
+        const initData = getTelegramInitData()
+        
+        if (!initData) {
+          console.log('未获取到 Telegram 初始化数据')
+          return
+        }
+        
+        // 发送到后端验证
+        const validateTg = async () => { 
+          try {
+            const response = await http.post<ValidateResponse>('/telegram/verify', {
+              initData: initData.rawInitData
+            })
+            
+            if (response.data.success) {
+              console.log('Telegram用户验证成功', response.data.user)
+            } else {
+              console.log('Telegram用户验证失败', response.data.message)
+            }
+          } catch (error) {
+            console.error('Telegram用户验证请求失败', (error as Error).message)
           }
+        }
+        
+        await validateTg()
+      } catch (error) {
+        console.error('获取 Telegram 数据失败', (error as Error).message)
       }
     }
     
