@@ -2,39 +2,52 @@
 
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
-import { useLaunchParams, useRawInitData } from '@telegram-apps/sdk-react'
-import { getInitData } from '@/telegramWebApp/telegrambot'
+import { retrieveLaunchParams, retrieveRawInitData } from '@telegram-apps/sdk-react'
+import { getInitData, isTelegramEnvironment } from '@/telegramWebApp/telegrambot'
 import { initData, telegramLogin } from '@/utils/api'
 export default function HomePage() {
-  // 通过 SDK hooks 读取启动参数与原始 initData
-  const launchParams = useLaunchParams()
-  const rawInitData = useRawInitData()
+  // 不使用 SDK hooks，改为在副作用中安全读取
 
   useEffect(() => {
     const data = getInitData()
     
     console.log('获取到Telegram InitData:', data)
     console.log('格式处理：',initData)
-    console.log('SDK useLaunchParams:', launchParams)
-    console.log('SDK useRawInitData:', rawInitData)
-    // 仅在存在原始 initData 时尝试登录，避免非 Telegram 环境报错
-    if (rawInitData) {
-      telegramLogin()
-        .then(res => {
-          console.log('Telegram 登录结果:', res);
-          if (res.success) {
-            console.log('登录成功，用户数据:', res.data);
-          } else {
-            console.log('登录失败:', res.message);
-          }
-        })
-        .catch(err => {
-          console.error('Telegram 登录出错:', err);
-        });
+    if (isTelegramEnvironment()) {
+      try {
+        const lp = retrieveLaunchParams()
+        console.log('SDK LaunchParams:', lp)
+      } catch (e) {
+        console.warn('读取 LaunchParams 失败（已忽略）:', e)
+      }
+      let rawInit: string | null = null
+      try {
+        rawInit = retrieveRawInitData() || null
+        console.log('SDK raw initData:', rawInit)
+      } catch (e) {
+        console.warn('读取 raw initData 失败（已忽略）:', e)
+      }
+
+      if (rawInit) {
+        telegramLogin()
+          .then(res => {
+            console.log('Telegram 登录结果:', res);
+            if (res.success) {
+              console.log('登录成功，用户数据:', res.data);
+            } else {
+              console.log('登录失败:', res.message);
+            }
+          })
+          .catch(err => {
+            console.error('Telegram 登录出错:', err);
+          });
+      } else {
+        console.warn('未获取到 raw initData，跳过登录请求。')
+      }
     } else {
-      console.warn('当前不在 Telegram 环境或未获取到 initData，跳过登录请求。')
+      console.warn('当前不在 Telegram 环境，跳过 SDK 参数读取与登录。')
     }
-  }, [launchParams, rawInitData])
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black relative overflow-hidden pb-20">
