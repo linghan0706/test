@@ -36,34 +36,9 @@ export function getInitData(): TelegramInitData | null {
     const raw = retrieveRawInitData();
     if (!raw) return null;
 
-    const data = JSON.parse(raw) as {
-      user?: { id: number; first_name: string; username?: string };
-      auth_date: number;
-      hash: string;
-      start_param?: string;
-      chat?: unknown;
-    };
-
-    const formatted: TelegramInitData = {
-      user: data.user
-        ? ({
-            id: data.user.id,
-            first_name: data.user.first_name,
-            username: data.user.username,
-          } as TelegramUser)
-        : undefined,
-      auth_date: data.auth_date,
-      hash: data.hash,
-    };
-
-    if (data.start_param) {
-      formatted.start_param = data.start_param;
-    }
-    if (data.chat) {
-      formatted.chat = data.chat as TelegramChat;
-    }
-
-    return formatted;
+    // Telegram WebApp 的 initData 原始值是查询字符串："user=...&auth_date=...&hash=...&..."
+    const parsed = parseInitDataQueryString(raw);
+    return parsed;
   } catch (e) {
     console.warn('通过 SDK 获取 initData 失败：', e);
     return null;
@@ -97,21 +72,29 @@ export function isTelegramEnvironment(): boolean {
  * @returns {string} 例如: "user=%7B%22id%22%3A123456%7D&auth_date=1234567890&hash=abc123"
  */
 export function getFormattedInitData(): { initData: string } | null {
-  const formattedData = formatInitDataToQueryString();
-  if (!formattedData) return null;
-  return { initData: formattedData };
+  if (typeof window === 'undefined') return null;
+  if (!isTelegramEnvironment()) return null;
+  try {
+    const raw = retrieveRawInitData();
+    if (!raw || typeof raw !== 'string') return null;
+    // 直接返回 SDK 的原始 initData（完整查询字符串，包含 signature、chat_instance 等）
+    return { initData: raw };
+  } catch (e) {
+    console.warn('读取原始 initData 失败：', e);
+    return null;
+  }
 }
 
 /**
  * 将 SDK 获取的 initData 转为查询字符串（内部使用）
  */
 export function formatInitDataToQueryString(): string | null {
+  // 仍然支持将解析后的数据转为最小查询串，但不用于登录
   const initData = getInitData();
   if (!initData) return null;
 
   const params = new URLSearchParams();
 
-  // user：使用 JSON 字符串表示
   if (initData.user) {
     const userStr = JSON.stringify({
       id: initData.user.id,
@@ -124,6 +107,61 @@ export function formatInitDataToQueryString(): string | null {
   params.append('auth_date', initData.auth_date.toString());
   params.append('hash', initData.hash);
 
+  if (initData.chat_type) params.append('chat_type', initData.chat_type);
+  if (initData.chat_instance) params.append('chat_instance', initData.chat_instance);
+  if (initData.start_param) params.append('start_param', initData.start_param);
+
   return params.toString();
+}
+
+/**
+ * 解析 Telegram WebApp 原始 initData 查询字符串
+ * 示例：
+ * user=%7B%22id%22%3A123...%7D&chat_instance=...&chat_type=sender&auth_date=1762246941&signature=...&hash=...
+ */
+function parseInitDataQueryString(raw: string): TelegramInitData {
+  const qs = raw.startsWith('?') ? raw.slice(1) : raw;
+  const params = new URLSearchParams(qs);
+
+  const userParam = params.get('user');
+  let user: TelegramUser | undefined;
+  if (userParam) {
+    try {
+      // URLSearchParams.get 已经对 %xx 解码，得到 JSON 字符串
+      const u = JSON.parse(userParam) as Partial<TelegramUser>;
+      user = {
+        id: Number(u.id),
+        first_name: String(u.first_name ?? ''),
+        last_name: u.last_name,
+        username: u.username,
+        language_code: u.language_code,
+        allows_write_to_pm: u.allows_write_to_pm,
+        photo_url: u.photo_url,
+        is_premium: u.is_premium,
+      };
+    } catch (e) {
+      console.warn('解析 user 字段失败（忽略该字段）：', e);
+    }
+  }
+
+  const chat_type = params.get('chat_type') ?? undefined;
+  const chat_instance = params.get('chat_instance') ?? undefined;
+  const start_param = params.get('start_param') ?? undefined;
+
+  const auth_dateStr = params.get('auth_date');
+  const hash = params.get('hash') ?? '';
+
+  const auth_date = auth_dateStr ? Number(auth_dateStr) : Date.now();
+
+  const result: TelegramInitData = {
+    user,
+    chat_type,
+    chat_instance,
+    start_param,
+    auth_date,
+    hash,
+  };
+
+  return result;
 }
 
