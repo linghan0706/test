@@ -1,25 +1,5 @@
-// 定义 Telegram WebApp 类型
-interface TelegramWebApp {
-  HapticFeedback: {
-    impactOccurred: (style: 'light' | 'medium' | 'heavy') => void
-    notificationOccurred: (type: 'success' | 'error' | 'warning') => void
-  }
-}
-// 声明 Telegram WebApp 全局变量
-declare const Telegram: {
-  WebApp: {
-    HapticFeedback: {
-      impactOccurred: (style: 'light' | 'medium' | 'heavy') => void
-      notificationOccurred: (type: 'success' | 'error' | 'warning') => void
-    }
-  }
-}
-
-interface Window {
-  Telegram?: {
-    WebApp: TelegramWebApp
-  }
-}
+// Use global typings from src/types/index.ts to avoid conflicts
+export {}
 // 方式一
 function vibrateLight() {
   window.Telegram.WebApp.HapticFeedback.impactOccurred('light')
