@@ -1,8 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
 
-// 创建 axios 实例
+// 创建 axios 实例（使用同源路径，避免浏览器混合内容拦截）
 const http: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081',
+  // 使用空 baseURL，确保像 '/api/auth/login' 这样的绝对路径走当前站点域名
+  // 由 next.config.ts 的 rewrites 将其代理到后端
+  baseURL: '',
   timeout: 10000, // 10秒超时
   headers: {
     'Content-Type': 'application/json',
