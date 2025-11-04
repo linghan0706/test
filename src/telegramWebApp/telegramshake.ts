@@ -1,18 +1,18 @@
 // Use global typings from src/types/index.ts to avoid conflicts
-export {}
+//export {}
 // 方式一
-// function vibrateLight() {
-//   window.Telegram.WebApp.HapticFeedback.impactOccurred('light')
-// }
+{/**function vibrateLight() {
+  window.Telegram.WebApp.HapticFeedback.impactOccurred('light')
+}*/}
 
-// // 方式二
-// function vibrateLights() {
-//   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-//     window.Telegram.WebApp.HapticFeedback.impactOccurred('light')
-//   } else {
-//     console.warn('震动触发：轻微')
-//   }
-// }
+// 方式二
+{/*function vibrateLights() {
+  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+    window.Telegram.WebApp.HapticFeedback.impactOccurred('light')
+  } else {
+    console.warn('震动触发：轻微')
+  }
+}*/}
 
 {
   /** 方法调用
