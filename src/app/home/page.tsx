@@ -2,28 +2,39 @@
 
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
-import { getInitDataAsync } from '@/telegramWebApp/telegrambot'
-import { getInitDataFormattedOnce, telegramLogin } from '@/utils/api'
+import { useLaunchParams, useRawInitData } from '@telegram-apps/sdk-react'
+import { getInitData } from '@/telegramWebApp/telegrambot'
+import { initData, telegramLogin } from '@/utils/api'
 export default function HomePage() {
+  // 通过 SDK hooks 读取启动参数与原始 initData
+  const launchParams = useLaunchParams()
+  const rawInitData = useRawInitData()
+
   useEffect(() => {
-    (async () => {
-      const data = await getInitDataAsync()
-      console.log('获取到Telegram InitData:', data)
-
-      const formatted = await getInitDataFormattedOnce()
-      console.log('格式处理：', formatted)
-
-      const res = await telegramLogin()
-      console.log('Telegram 登录结果:', res);
-      if (res.success) {
-        console.log('登录成功，用户数据:', res.data);
-      } else {
-        console.log('登录失败:', res.message);
-      }
-    })().catch(err => {
-      console.error('Telegram 登录出错:', err);
-    })
-  }, [])
+    const data = getInitData()
+    
+    console.log('获取到Telegram InitData:', data)
+    console.log('格式处理：',initData)
+    console.log('SDK useLaunchParams:', launchParams)
+    console.log('SDK useRawInitData:', rawInitData)
+    // 仅在存在原始 initData 时尝试登录，避免非 Telegram 环境报错
+    if (rawInitData) {
+      telegramLogin()
+        .then(res => {
+          console.log('Telegram 登录结果:', res);
+          if (res.success) {
+            console.log('登录成功，用户数据:', res.data);
+          } else {
+            console.log('登录失败:', res.message);
+          }
+        })
+        .catch(err => {
+          console.error('Telegram 登录出错:', err);
+        });
+    } else {
+      console.warn('当前不在 Telegram 环境或未获取到 initData，跳过登录请求。')
+    }
+  }, [launchParams, rawInitData])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black relative overflow-hidden pb-20">
