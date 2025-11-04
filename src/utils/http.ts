@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, In
 // 创建 axios 实例（统一后端基础地址配置）
 const http: AxiosInstance = axios.create({
   // 统一设置后端基础地址。如果请求使用相对路径，会拼接到该地址。
-  baseURL: 'http://xb8692a8.natappfree.cc:8080',
+  baseURL: 'http://xb8692a8.natappfree.cc',
   timeout: 10000, // 10秒超时
   headers: {
     'Content-Type': 'application/json',
