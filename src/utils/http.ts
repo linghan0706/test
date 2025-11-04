@@ -1,10 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
 
-// 创建 axios 实例（使用同源路径，避免浏览器混合内容拦截）
+// 创建 axios 实例（统一后端基础地址配置）
 const http: AxiosInstance = axios.create({
-  // 使用空 baseURL，确保像 '/api/auth/login' 这样的绝对路径走当前站点域名
-  // 由 next.config.ts 的 rewrites 将其代理到后端
-  baseURL: '',
+  // 统一设置后端基础地址。如果请求使用相对路径，会拼接到该地址。
+  baseURL: 'http://xb8692a8.natappfree.cc:8080',
   timeout: 10000, // 10秒超时
   headers: {
     'Content-Type': 'application/json',
