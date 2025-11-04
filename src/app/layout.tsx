@@ -7,6 +7,7 @@ import { ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { MainLayout } from '@/components/layout'
 import { LoadingProvider } from '@/components/ui/LoadingProvider'
+import Script from 'next/script'
 
 
 // console.log("userData", Telegram.getTelegramUser());
@@ -36,6 +37,8 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`${inter.className} ${jersey10.variable} ${jersey25.variable}`}>
+        {/* 预加载 Telegram WebApp 脚本，确保 window.Telegram 早于组件初始化可用 */}
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
         <AntdRegistry>
           <ConfigProvider locale={zhCN}>
             <LoadingProvider>

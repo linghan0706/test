@@ -1,5 +1,5 @@
 import { httpUtils } from './http'
-import { getFormattedInitData } from '../telegramWebApp/telegrambot'
+import { getFormattedInitDataAsync } from '../telegramWebApp/telegrambot'
 
 // 定义 Telegram 登录相关的类型
 export interface TelegramLoginRequest {
@@ -51,16 +51,18 @@ const STORAGE_KEYS = {
   USER: 'telegram_user_info',
   LOGIN_TIME: 'telegram_login_time'
 } as const
-// 导出格式化数据
-export const initData=getFormattedInitData();
+// 异步获取并导出格式化数据（按需调用处直接等待更可靠）
+export async function getInitDataFormattedOnce(): Promise<{ initData: string } | null> {
+  return await getFormattedInitDataAsync();
+}
 /**
  * Telegram Web App 登录函数
  * 使用 getFormattedInitData 返回的数据进行登录
  */
 export async function telegramLogin(): Promise<TelegramLoginResponse | LoginError> {
   try {
-    // 1. 获取格式化后的 Telegram initData
-    const initDataResult = getFormattedInitData()
+    // 1. 获取格式化后的 Telegram initData（异步等待 WebApp 就绪）
+    const initDataResult = await getFormattedInitDataAsync()
     
     if (!initDataResult || !initDataResult.initData) {
       return {

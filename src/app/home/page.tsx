@@ -2,27 +2,27 @@
 
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
-import { getInitData } from '@/telegramWebApp/telegrambot'
-import { initData, telegramLogin } from '@/utils/api'
+import { getInitDataAsync } from '@/telegramWebApp/telegrambot'
+import { getInitDataFormattedOnce, telegramLogin } from '@/utils/api'
 export default function HomePage() {
   useEffect(() => {
-    const data = getInitData()
-    
-    console.log('获取到Telegram InitData:', data)
-    console.log('格式处理：',initData)
+    (async () => {
+      const data = await getInitDataAsync()
+      console.log('获取到Telegram InitData:', data)
 
-    telegramLogin()
-      .then(res => {
-        console.log('Telegram 登录结果:', res);
-        if (res.success) {
-          console.log('登录成功，用户数据:', res.data);
-        } else {
-          console.log('登录失败:', res.message);
-        }
-      })
-      .catch(err => {
-        console.error('Telegram 登录出错:', err);
-      });
+      const formatted = await getInitDataFormattedOnce()
+      console.log('格式处理：', formatted)
+
+      const res = await telegramLogin()
+      console.log('Telegram 登录结果:', res);
+      if (res.success) {
+        console.log('登录成功，用户数据:', res.data);
+      } else {
+        console.log('登录失败:', res.message);
+      }
+    })().catch(err => {
+      console.error('Telegram 登录出错:', err);
+    })
   }, [])
 
   return (
