@@ -1,5 +1,5 @@
 import { httpUtils } from './http'
-import { getFormattedInitData } from '../telegramWebApp/telegrambot'
+import { getFormattedInitData, formatInitDataToQueryString } from '../telegramWebApp/telegrambot'
 
 // 定义 Telegram 登录相关的类型
 export interface TelegramLoginRequest {
@@ -10,6 +10,7 @@ export interface TelegramLoginRequest {
 export interface BaseApiResponse {
   success: boolean
   message: string
+  code?: number
   timestamp: number
 }
 
@@ -89,6 +90,30 @@ export async function telegramLogin(): Promise<TelegramLoginResponse | LoginErro
     }
 
     if (!response.success) {
+      // 若后端返回签名校验失败，尝试使用最小化查询串重试一次（部分后端仅接受 user/auth_date/hash）
+      const msg = response.message || ''
+      if (msg.includes('签名') || msg.includes('InitData')) {
+        const minimal = formatInitDataToQueryString()
+        if (minimal && typeof minimal === 'string' && minimal.length > 0) {
+          console.warn('登录失败，尝试使用最小化 initData 重试...')
+          console.log('Minimal InitData:', minimal)
+          const retryRes = await httpUtils.post<TelegramLoginResponse>(
+            '/api/auth/login',
+            { initData: minimal }
+          )
+          if (retryRes && typeof retryRes === 'object') {
+            if (!retryRes.success) {
+              return {
+                success: false,
+                message: retryRes.message || msg || 'Login failed',
+                timestamp: retryRes.timestamp || Date.now()
+              }
+            }
+            // 覆盖 response，按正常成功流程处理
+            return retryRes
+          }
+        }
+      }
       return {
         success: false,
         message: response.message || 'Login failed',
@@ -144,11 +169,15 @@ function saveLoginInfo(loginResponse: TelegramLoginSuccessResponse): void {
     localStorage.setItem(STORAGE_KEYS.TOKEN, loginResponse.data.accessToken)
     
     // 保存用户信息
+    const sanitizedAvatar = (loginResponse.data.avatarUrl || '')
+      .trim()
+      .replace(/^`|`$/g, '')
+    
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({
       userId: loginResponse.data.userId,
       telegramId: loginResponse.data.telegramId,
       username: loginResponse.data.username,
-      avatarUrl: loginResponse.data.avatarUrl,
+      avatarUrl: sanitizedAvatar,
       refreshToken: loginResponse.data.refreshToken,
       expiresIn: loginResponse.data.expiresIn
     }))
